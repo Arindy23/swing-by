@@ -5,8 +5,6 @@ import de.arindy.swingby.gui.CONTEXT.updateDeltaTime
 import processing.core.PApplet
 import processing.event.KeyEvent
 import processing.event.MouseEvent
-import processing.javafx.PSurfaceFX.PApplicationFX.surface
-import kotlin.system.measureTimeMillis
 
 class Simulation : PApplet() {
 

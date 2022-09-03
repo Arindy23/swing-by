@@ -1,6 +1,7 @@
 package de.arindy.swingby.gui
 
 import processing.core.PApplet
+import processing.event.MouseEvent
 
 fun PApplet.fill(color: String) {
     if (!color.startsWith("0x") || color.length > 10 || color.length < 3 || color.substring(2).any { c -> c.uppercaseChar() > 'F'  }) {
@@ -28,4 +29,8 @@ fun PApplet.rect(size: Size, position: Position = Position.ZERO) {
 
 fun PApplet.translate(position: Position) {
     this.translate(position.x, position.y)
+}
+
+fun MouseEvent.position() : Position {
+    return Position(this.x.toFloat(), this.y.toFloat())
 }

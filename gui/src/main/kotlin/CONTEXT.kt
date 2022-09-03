@@ -32,6 +32,10 @@ object CONTEXT {
 
 }
 
-fun resolution() : Size {
+fun resolution(): Size {
     return Size(CONTEXT.applet.width.toFloat(), CONTEXT.applet.height.toFloat())
+}
+
+fun mousePosition(): Position {
+    return Position(CONTEXT.applet.mouseX.toFloat(), CONTEXT.applet.mouseY.toFloat())
 }
