@@ -5,8 +5,6 @@ import de.arindy.swingby.gui.Position
 import de.arindy.swingby.gui.Size
 import de.arindy.swingby.gui.fill
 import de.arindy.swingby.gui.resolution
-import javafx.geometry.NodeOrientation
-import javafx.geometry.Pos
 import processing.event.KeyEvent
 import processing.event.MouseEvent
 
