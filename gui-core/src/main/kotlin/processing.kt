@@ -6,7 +6,7 @@ import processing.core.PApplet
 import processing.event.MouseEvent
 
 fun PApplet.fill(color: String) {
-    val hexCode = color(color)
+    val hexCode = color(color).substring(2)
     this.fill(
         hexCode.substring(0, 2).toInt(16).toFloat(),
         hexCode.substring(2, 4).toInt(16).toFloat(),
@@ -14,8 +14,9 @@ fun PApplet.fill(color: String) {
         hexCode.substring(6).toInt(16).toFloat()
     )
 }
+
 fun PApplet.stroke(color: String) {
-    val hexCode = color(color)
+    val hexCode = color(color).substring(2)
     this.stroke(
         hexCode.substring(0, 2).toInt(16).toFloat(),
         hexCode.substring(2, 4).toInt(16).toFloat(),
@@ -24,17 +25,21 @@ fun PApplet.stroke(color: String) {
     )
 }
 
-private fun color(color: String): String {
-    if (!color.startsWith("0x") || color.length > 10 || color.length < 3 || color.substring(2)
-            .any { c -> c.uppercaseChar() > 'F' }
-    ) {
+fun color(color: String): String {
+    if (notAValidHexCode(color)) {
         throw IllegalArgumentException("\"$color\" is not a valid color!")
     }
-    var hexCode = color.substring(2)
-    for (range in color.length..9) {
-        hexCode += "F"
-    }
-    return hexCode
+    return color.padEnd(10, 'F')
+}
+
+private fun notAValidHexCode(color: String) =
+    !color.startsWith("0x")
+        || color.length > 10
+        || color.length < 3
+        || color.substring(2).any { !validHex(it) }
+
+fun validHex(char: Char): Boolean {
+    return char.toString().matches(Regex("[0-9a-fA-F]"))
 }
 
 fun PApplet.line(x1: Number, y1: Number, x2: Number, y2: Number) {
@@ -49,6 +54,6 @@ fun PApplet.translate(position: Position) {
     this.translate(position.x, position.y)
 }
 
-fun MouseEvent.position() : Position {
+fun MouseEvent.position(): Position {
     return Position(this.x.toFloat(), this.y.toFloat())
 }

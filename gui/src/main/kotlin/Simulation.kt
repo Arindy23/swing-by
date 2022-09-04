@@ -1,13 +1,15 @@
 package de.arindy.swingby.gui
 
-import de.arindy.swingby.gui.core.CONTEXT
-import de.arindy.swingby.gui.core.CONTEXT.components
-import de.arindy.swingby.gui.core.CONTEXT.guiComponents
-import de.arindy.swingby.gui.core.CONTEXT.inMatrix
-import de.arindy.swingby.gui.core.CONTEXT.updateDeltaTime
+import de.arindy.swingby.gui.core.Context
+import de.arindy.swingby.gui.core.Context.components
+import de.arindy.swingby.gui.core.Context.guiComponents
+import de.arindy.swingby.gui.core.Context.inMatrix
+import de.arindy.swingby.gui.core.Context.updateDeltaTime
 import de.arindy.swingby.gui.core.components.FPSCounter
 import de.arindy.swingby.gui.core.components.draw
 import de.arindy.swingby.gui.core.components.keyPressed
+import de.arindy.swingby.gui.core.components.mouseDragged
+import de.arindy.swingby.gui.core.components.mousePressed
 import de.arindy.swingby.gui.core.components.mouseReleased
 import processing.core.PApplet
 import processing.event.KeyEvent
@@ -18,7 +20,7 @@ class Simulation : PApplet() {
     private val fpsCounter = FPSCounter()
 
     init {
-        CONTEXT.register(this)
+        Context.register(this)
     }
 
     override fun settings() {
@@ -49,10 +51,10 @@ class Simulation : PApplet() {
 
     override fun keyPressed(event: KeyEvent) {
         if (event.keyCode == java.awt.event.KeyEvent.VK_F11) {
-            if (CONTEXT.isRegistered(fpsCounter)) {
-                CONTEXT.unregister(fpsCounter, gui = true)
+            if (Context.isRegistered(fpsCounter)) {
+                Context.unregister(fpsCounter, gui = true)
             } else {
-                CONTEXT.register(fpsCounter, gui = true)
+                Context.register(fpsCounter, gui = true)
             }
         }
         guiComponents().keyPressed(event)
@@ -60,6 +62,14 @@ class Simulation : PApplet() {
 
     override fun mouseReleased(event: MouseEvent) {
         guiComponents().mouseReleased(event)
+    }
+
+    override fun mousePressed(event: MouseEvent) {
+        guiComponents().mousePressed(event)
+    }
+
+    override fun mouseDragged(event: MouseEvent) {
+        guiComponents().mouseDragged(event)
     }
 
     override fun exit() {

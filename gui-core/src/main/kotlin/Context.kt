@@ -7,7 +7,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import processing.core.PApplet
 
-object CONTEXT {
+object Context {
 
     var deltaTime: Float = 0F
     private var lastTime: Long = 0
@@ -18,7 +18,7 @@ object CONTEXT {
     private val components = HashSet<Component>()
 
     fun register(applet: PApplet) {
-        CONTEXT.applet = applet
+        Context.applet = applet
     }
 
     fun register(component: Component, gui: Boolean = false) {

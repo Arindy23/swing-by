@@ -1,22 +1,25 @@
 package de.arindy.swingby.gui
 
-import de.arindy.swingby.gui.core.CONTEXT
+import de.arindy.swingby.gui.core.Context
 import de.arindy.swingby.gui.core.components.Button
 import de.arindy.swingby.gui.core.components.TextField
-import de.arindy.swingby.gui.core.units.Color
 import de.arindy.swingby.gui.core.units.Position
 
 class GUI {
 
     fun build() {
-        with(CONTEXT) {
-            register(Button())
+        with(Context) {
+            register(
+                Button(
+                    position = Position(220F, 10F)
+                ).registerAction("") { println("Button pressed") }, gui = true
+            )
             register(
                 TextField(
-                    position = Position(200F, 200F),
-                    color = Color(background = "0x555555", foreground = "0x000000"),
+                    position = Position(10F, 10F),
                     value = "Test"
-                ), gui = true)
+                ).register { _, newValue -> println(newValue) }, gui = true
+            )
         }
     }
 

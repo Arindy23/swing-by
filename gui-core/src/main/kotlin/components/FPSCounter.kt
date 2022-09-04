@@ -1,13 +1,14 @@
 package de.arindy.swingby.gui.core.components
 
-import de.arindy.swingby.gui.core.CONTEXT.applet
-import de.arindy.swingby.gui.core.CONTEXT.deltaTime
-import de.arindy.swingby.gui.core.CONTEXT.inMatrix
-import de.arindy.swingby.gui.core.CONTEXT.mousePosition
-import de.arindy.swingby.gui.core.CONTEXT.resolution
-import de.arindy.swingby.gui.core.CONTEXT.secondElapsed
+import de.arindy.swingby.gui.core.Context.applet
+import de.arindy.swingby.gui.core.Context.deltaTime
+import de.arindy.swingby.gui.core.Context.inMatrix
+import de.arindy.swingby.gui.core.Context.mousePosition
+import de.arindy.swingby.gui.core.Context.resolution
+import de.arindy.swingby.gui.core.Context.secondElapsed
 import de.arindy.swingby.gui.core.fill
 import de.arindy.swingby.gui.core.stroke
+import de.arindy.swingby.gui.core.units.Colors
 import de.arindy.swingby.gui.core.units.Position
 import de.arindy.swingby.gui.core.units.Size
 import processing.core.PApplet
@@ -29,9 +30,9 @@ class FPSCounter(
 
     private fun PApplet.drawText() {
         val color = if (inside(mousePosition())) {
-            "0x00FFFF"
+            Colors.secondary.selected
         } else {
-            "0xFFFFFF"
+            Colors.secondary.foreground
         }
         if (secondElapsed(0.1F)) {
             inMatrix {

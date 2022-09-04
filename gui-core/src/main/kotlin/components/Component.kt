@@ -1,11 +1,12 @@
 package de.arindy.swingby.gui.core.components
 
-import de.arindy.swingby.gui.core.CONTEXT.applet
-import de.arindy.swingby.gui.core.CONTEXT.inMatrix
-import de.arindy.swingby.gui.core.CONTEXT.resolution
+import de.arindy.swingby.gui.core.Context.applet
+import de.arindy.swingby.gui.core.Context.inMatrix
+import de.arindy.swingby.gui.core.Context.resolution
 import de.arindy.swingby.gui.core.units.Position
 import de.arindy.swingby.gui.core.units.Size
 import de.arindy.swingby.gui.core.fill
+import de.arindy.swingby.gui.core.units.Colors
 import de.arindy.swingby.gui.core.units.Dimensions
 import processing.core.PConstants.BASELINE
 import processing.core.PConstants.LEFT
@@ -26,7 +27,7 @@ interface Component {
     fun draw() {
         with(applet) {
             inMatrix {
-                fill("0xFF0000")
+                fill(Colors.warn.foreground)
                 textSize(15F)
                 textAlign(LEFT, BASELINE)
                 text("${asString()} has no draw Method!", 20F, resolution().height - 20F)
@@ -34,11 +35,13 @@ interface Component {
         }
     }
 
-    fun onKeyPressed(event: KeyEvent) {
-        println("$this received ${event.key}")
-    }
+    fun onKeyPressed(event: KeyEvent) {}
 
     fun mouseReleased(event: MouseEvent) {}
+
+    fun mousePressed(event: MouseEvent) {}
+
+    fun mouseDragged(event: MouseEvent) {}
 
     fun isFocused(): Boolean {
         return false

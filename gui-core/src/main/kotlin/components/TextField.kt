@@ -1,13 +1,13 @@
 package de.arindy.swingby.gui.core.components
 
-import de.arindy.swingby.gui.core.CONTEXT.applet
-import de.arindy.swingby.gui.core.CONTEXT.inMatrix
-import de.arindy.swingby.gui.core.CONTEXT.secondElapsed
+import de.arindy.swingby.gui.core.Context.applet
+import de.arindy.swingby.gui.core.Context.inMatrix
+import de.arindy.swingby.gui.core.Context.secondElapsed
 import de.arindy.swingby.gui.core.fill
-import de.arindy.swingby.gui.core.listener.ValueReciever
 import de.arindy.swingby.gui.core.position
 import de.arindy.swingby.gui.core.rect
 import de.arindy.swingby.gui.core.stroke
+import de.arindy.swingby.gui.core.units.Colors
 import de.arindy.swingby.gui.core.units.Color
 import de.arindy.swingby.gui.core.units.Position
 import de.arindy.swingby.gui.core.units.Size
@@ -17,10 +17,13 @@ import processing.core.PConstants.DELETE
 import processing.core.PConstants.LEFT
 import processing.event.KeyEvent
 import processing.event.MouseEvent
+import java.awt.event.KeyEvent.VK_A
 import java.awt.event.KeyEvent.VK_END
 import java.awt.event.KeyEvent.VK_HOME
 import java.awt.event.KeyEvent.VK_LEFT
 import java.awt.event.KeyEvent.VK_RIGHT
+import java.util.*
+import kotlin.collections.HashMap
 
 class TextField(
     override var position: Position,
@@ -28,22 +31,22 @@ class TextField(
     override var scale: Float = 1F,
     override var name: String = "TestTextField",
     private var value: String = "",
-    private val color: Color = Color(),
+    private val color: Color = Colors.primary,
 ) : Component {
     private val validChars = Regex("[\\wöÖäÄüÜß-]")
-    private val valueRecievers: HashSet<ValueReciever> = HashSet()
+    private val valueReceivers: HashMap<String, ((String, String) -> Unit)> = HashMap()
 
     private var focused = false
     private var index = value.length
     private var marked = IntRange.EMPTY
 
-    fun register(reciever: ValueReciever): TextField {
-        valueRecievers.add(reciever)
+    fun register(name: String = UUID.randomUUID().toString(), block: (oldValue: String, newValue: String) -> Unit): TextField {
+        valueReceivers[name] = block
         return this
     }
 
-    fun unregister(reciever: ValueReciever): TextField {
-        valueRecievers.remove(reciever)
+    fun unregister(name: String): TextField {
+        valueReceivers.remove(name)
         return this
     }
 
@@ -86,7 +89,9 @@ class TextField(
     }
 
     override fun onKeyPressed(event: KeyEvent) {
-        if (event.key == BACKSPACE && value.isNotEmpty()) {
+        if (event.isControlDown && event.keyCode == VK_A) {
+            selectAll()
+        } else if (event.key == BACKSPACE && value.isNotEmpty()) {
             onBackspace()
         } else if (event.key == DELETE && value.isNotEmpty() && index < value.length) {
             onDelete()
@@ -178,6 +183,11 @@ class TextField(
         changeValue(newValue)
     }
 
+    private fun selectAll() {
+        marked = IntRange(0, value.length)
+        index = 0
+    }
+
     private fun onBackspace() {
         val newValue = if (marked.isEmpty()) {
             index--
@@ -194,7 +204,7 @@ class TextField(
 
     private fun changeValue(newValue: String) {
         marked = IntRange.EMPTY
-        valueRecievers.forEach { it.onValueChanged(value, newValue) }
+        valueReceivers.forEach { it.value(value, newValue) }
         value = newValue
     }
 
