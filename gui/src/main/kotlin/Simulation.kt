@@ -24,12 +24,12 @@ class Simulation : PApplet() {
     }
 
     override fun settings() {
-        size(1024, 768)
+        size(1240, 768)
     }
 
     override fun setup() {
         setupSurface()
-        frameRate(60f)
+        frameRate(144f)
         background(0x000000)
         GUI().build()
     }
