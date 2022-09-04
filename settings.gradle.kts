@@ -1,4 +1,4 @@
 
 rootProject.name = "swingby"
 
-include("gui")
+include("gui-core", "gui")

@@ -1,12 +1,21 @@
 package de.arindy.swingby.gui
 
-import de.arindy.swingby.gui.CONTEXT.components
-import de.arindy.swingby.gui.CONTEXT.updateDeltaTime
+import de.arindy.swingby.gui.core.CONTEXT
+import de.arindy.swingby.gui.core.CONTEXT.components
+import de.arindy.swingby.gui.core.CONTEXT.guiComponents
+import de.arindy.swingby.gui.core.CONTEXT.inMatrix
+import de.arindy.swingby.gui.core.CONTEXT.updateDeltaTime
+import de.arindy.swingby.gui.core.components.FPSCounter
+import de.arindy.swingby.gui.core.components.draw
+import de.arindy.swingby.gui.core.components.keyPressed
+import de.arindy.swingby.gui.core.components.mouseReleased
 import processing.core.PApplet
 import processing.event.KeyEvent
 import processing.event.MouseEvent
 
 class Simulation : PApplet() {
+
+    private val fpsCounter = FPSCounter()
 
     init {
         CONTEXT.register(this)
@@ -18,7 +27,7 @@ class Simulation : PApplet() {
 
     override fun setup() {
         setupSurface()
-        frameRate(120f)
+        frameRate(60f)
         background(0x000000)
         GUI().build()
     }
@@ -31,16 +40,32 @@ class Simulation : PApplet() {
 
     override fun draw() {
         background(0x000000)
-        components().forEach { component -> component.draw() }
+        inMatrix {
+            components().draw()
+        }
+        guiComponents().draw()
         updateDeltaTime(System.currentTimeMillis())
     }
 
-    override fun keyPressed(event: KeyEvent?) {
-        components().forEach { component -> component.onKeyPressed(event!!) }
+    override fun keyPressed(event: KeyEvent) {
+        if (event.keyCode == java.awt.event.KeyEvent.VK_F11) {
+            if (CONTEXT.isRegistered(fpsCounter)) {
+                CONTEXT.unregister(fpsCounter, gui = true)
+            } else {
+                CONTEXT.register(fpsCounter, gui = true)
+            }
+        }
+        guiComponents().keyPressed(event)
     }
 
     override fun mouseReleased(event: MouseEvent) {
-        components().forEach { component -> component.mouseReleased(event) }
+        guiComponents().mouseReleased(event)
+    }
+
+    override fun exit() {
+        if (key != ESC) {
+            super.exit()
+        }
     }
 
     companion object {

@@ -1,4 +1,4 @@
-package de.arindy.swingby.gui
+package de.arindy.swingby.gui.core.units
 
 class Position(val x: Float, val y: Float) {
     companion object {
@@ -6,6 +6,6 @@ class Position(val x: Float, val y: Float) {
     }
 
     override fun toString(): String {
-        return "[${this.x} : ${this.y}]"
+        return "[x: ${this.x}, y: ${this.y}]"
     }
 }
