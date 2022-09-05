@@ -46,7 +46,7 @@ fun PApplet.line(x1: Number, y1: Number, x2: Number, y2: Number) {
     this.line(x1.toFloat(), y1.toFloat(), x2.toFloat(), y2.toFloat())
 }
 
-fun PApplet.rect(size: Size, position: Position = Position.ZERO) {
+fun PApplet.rect(size: Size, position: Position) {
     this.rect(position.x, position.y, size.width, size.height)
 }
 
