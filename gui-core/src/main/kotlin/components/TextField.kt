@@ -7,8 +7,8 @@ import de.arindy.swingby.gui.core.fill
 import de.arindy.swingby.gui.core.position
 import de.arindy.swingby.gui.core.rect
 import de.arindy.swingby.gui.core.stroke
-import de.arindy.swingby.gui.core.units.Colors
 import de.arindy.swingby.gui.core.units.Color
+import de.arindy.swingby.gui.core.units.Colors
 import de.arindy.swingby.gui.core.units.Position
 import de.arindy.swingby.gui.core.units.Size
 import processing.core.PConstants
@@ -23,24 +23,31 @@ import java.awt.event.KeyEvent.VK_HOME
 import java.awt.event.KeyEvent.VK_LEFT
 import java.awt.event.KeyEvent.VK_RIGHT
 import java.util.*
-import kotlin.collections.HashMap
 
+@Suppress("RegExpDuplicateCharacterInClass", "RegExpDuplicateCharacterInClass", "RegExpDuplicateCharacterInClass")
 class TextField(
     override var position: Position,
     override var size: Size = Size(200F, 25F),
-    override var scale: Float = 1F,
     override var name: String = "TestTextField",
     private var value: String = "",
     private val color: Color = Colors.primary,
+    validCharacters: String = "\\wöÖäÄüÜß-"
 ) : Component {
-    private val validChars = Regex("[\\wöÖäÄüÜß-]")
+    private val validChars = Regex("[$validCharacters]")
     private val valueReceivers: HashMap<String, ((String, String) -> Unit)> = HashMap()
 
     private var focused = false
     private var index = value.length
     private var marked = IntRange.EMPTY
 
-    fun register(name: String = UUID.randomUUID().toString(), block: (oldValue: String, newValue: String) -> Unit): TextField {
+    fun register(actions: Map<String, (oldValue: String, newValue: String) -> Unit>) {
+        actions.forEach { register(it.key, it.value) }
+    }
+
+    fun register(
+        name: String = UUID.randomUUID().toString(),
+        block: (oldValue: String, newValue: String) -> Unit
+    ): TextField {
         valueReceivers[name] = block
         return this
     }
@@ -53,10 +60,9 @@ class TextField(
     override fun draw() {
         with(applet) {
             inMatrix {
-                scale(scale)
                 stroke(color.foreground)
                 fill(color.background)
-                rect(size, position)
+                rect(position, size)
             }
             inMatrix {
                 textSize(16F)
@@ -214,6 +220,10 @@ class TextField(
 
     override fun toString(): String {
         return asString()
+    }
+
+    fun doubleValue(): Double {
+        return value.toDoubleOrNull() ?: 0.0
     }
 }
 

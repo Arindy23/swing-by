@@ -1,7 +1,7 @@
 package de.arindy.swingby.gui.core.units
 
 import de.arindy.swingby.gui.core.color
-import de.arindy.swingby.gui.core.validHex
+import de.arindy.swingby.gui.core.invalidHex
 
 class Color(background: String, foreground: String, selected: String) {
 
@@ -20,7 +20,7 @@ class Color(background: String, foreground: String, selected: String) {
     }
 
     fun withAlpha(alpha: String): Color {
-        if (alpha.length != 2 && alpha.any { !validHex(it) }) {
+        if (alpha.length != 2 && alpha.any { invalidHex(it) }) {
             throw IllegalArgumentException("$alpha is not a valid string")
         }
         return Color(

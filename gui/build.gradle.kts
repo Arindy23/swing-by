@@ -7,6 +7,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.5")
     implementation("org.processing:core:3.3.7")
     implementation(project(":gui-core"))
+    implementation(project(":swingby-core"))
 }
 
 application {

@@ -7,4 +7,8 @@ data class Velocity2D(
     override fun toString(): String {
         return "[x=$x, y=$y]"
     }
+
+    operator fun times(other: Velocity2D): Double {
+        return this.x * other.y + this.y * other.y
+    }
 }

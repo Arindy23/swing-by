@@ -6,26 +6,29 @@ import de.arindy.swingby.gui.core.fill
 import de.arindy.swingby.gui.core.position
 import de.arindy.swingby.gui.core.rect
 import de.arindy.swingby.gui.core.stroke
-import de.arindy.swingby.gui.core.units.Colors
 import de.arindy.swingby.gui.core.units.Color
+import de.arindy.swingby.gui.core.units.Colors
 import de.arindy.swingby.gui.core.units.Position
 import de.arindy.swingby.gui.core.units.Size
 import processing.core.PConstants.CENTER
 import processing.event.MouseEvent
 import java.util.*
-import kotlin.collections.HashMap
 
 class Button(
-    override var position: Position,
-    override var size: Size = Size(100F, 25F),
-    override var scale: Float = 1F,
-    override var name: String = "Test",
+    override val position: Position,
+    override val size: Size = Size(100F, 25F),
+    override val name: String,
     private val color: Color = Colors.primaryInverted,
     private val colorPressed: Color = Colors.primary,
 ) : Component {
 
     private val valueReceivers: HashMap<String, () -> Unit> = HashMap()
     private var pressed: Boolean = false
+
+    fun registerActions(actions: Map<String, () -> Unit>): Button {
+        actions.forEach { registerAction(it.key, it.value) }
+        return this
+    }
 
     fun registerAction(name: String = UUID.randomUUID().toString(), block: () -> Unit): Button {
         valueReceivers[name] = block
@@ -45,10 +48,9 @@ class Button(
         }
         with(Context.applet) {
             inMatrix {
-                scale(scale)
                 stroke(foreground)
                 fill(background)
-                rect(size, position)
+                rect(position, size)
             }
             inMatrix {
                 fill(foreground)

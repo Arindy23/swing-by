@@ -9,6 +9,8 @@ import processing.core.PApplet
 
 object Context {
 
+    var currentScale: Float = 1F
+    var currentTranslation: Position = Position.ZERO
     var deltaTime: Float = 0F
     private var lastTime: Long = 0
     private var elapsed: Float = 0F
@@ -62,6 +64,10 @@ object Context {
         }
     }
 
+    fun insideGuiComponent(): Boolean {
+        return guiComponents().any { component -> component.inside(mousePosition()) }
+    }
+
     fun secondElapsed(delay: Float = 0F): Boolean {
         return elapsed <= delay
     }
@@ -72,6 +78,10 @@ object Context {
 
     fun mousePosition(): Position {
         return Position(applet.mouseX.toFloat(), applet.mouseY.toFloat())
+    }
+
+    fun realMousePosition(): Position {
+        return currentTranslation + mousePosition() / currentScale
     }
 
     fun PApplet.inMatrix(block: () -> Unit) {

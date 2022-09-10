@@ -3,11 +3,11 @@ package de.arindy.swingby.gui.core.components
 import de.arindy.swingby.gui.core.Context.applet
 import de.arindy.swingby.gui.core.Context.inMatrix
 import de.arindy.swingby.gui.core.Context.resolution
-import de.arindy.swingby.gui.core.units.Position
-import de.arindy.swingby.gui.core.units.Size
 import de.arindy.swingby.gui.core.fill
 import de.arindy.swingby.gui.core.units.Colors
 import de.arindy.swingby.gui.core.units.Dimensions
+import de.arindy.swingby.gui.core.units.Position
+import de.arindy.swingby.gui.core.units.Size
 import processing.core.PConstants.BASELINE
 import processing.core.PConstants.LEFT
 import processing.event.KeyEvent
@@ -15,12 +15,11 @@ import processing.event.MouseEvent
 
 interface Component {
 
-    var position: Position
-    var size: Size
-    var scale: Float
+    val position: Position
+    val size: Size
     val componentName: String
         get() = this.javaClass.simpleName
-    var name: String
+    val name: String
     val dimensions: Dimensions
         get() = Dimensions(position, size)
 
@@ -49,10 +48,10 @@ interface Component {
 
     fun inside(position: Position): Boolean {
         val dimensions = dimensions
-        return scale * dimensions.x0 < position.x
-            && scale * dimensions.x1 > position.x
-            && scale * dimensions.y0 < position.y
-            && scale * dimensions.y1 > position.y
+        return dimensions.x0 < position.x
+            && dimensions.x1 > position.x
+            && dimensions.y0 < position.y
+            && dimensions.y1 > position.y
     }
 
     fun asString(): String {
