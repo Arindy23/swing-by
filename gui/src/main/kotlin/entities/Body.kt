@@ -5,6 +5,7 @@ import de.arindy.swingby.core.data.Velocity2D
 import de.arindy.swingby.gui.core.Context
 import de.arindy.swingby.gui.core.Context.currentScale
 import de.arindy.swingby.gui.core.Context.inMatrix
+import de.arindy.swingby.gui.core.Context.register
 import de.arindy.swingby.gui.core.components.Component
 import de.arindy.swingby.gui.core.ellipse
 import de.arindy.swingby.gui.core.fill
@@ -26,10 +27,11 @@ import de.arindy.swingby.core.data.Body as BodyData
 
 class Body(
     override var position: Position,
+    infoPosition: Position,
     val diameter: Float,
-    private val drawDiameter: Float = if (diameter < 1000F) 100F else diameter,
+    private var drawDiameter: Float = diameter,
     override var size: Size = Size(drawDiameter, drawDiameter),
-    override var name: String,
+    override var name: () -> String,
     private val color: Color,
     private var trail: Boolean = false,
     mass: Double,
@@ -42,6 +44,7 @@ class Body(
     var lastPosition: Position = position
     private var data: BodyData
     private var trailStep: Int
+    private val info: BodyInfo
 
     init {
         positions.add(position)
@@ -52,6 +55,19 @@ class Body(
             diameter = diameter.toDouble()
         )
         trailStep = 200
+        info = register(
+            BodyInfo(
+                infoPosition,
+                body = data,
+                name = name,
+                color = { color }
+            ).follow {
+                run {
+                    this.action.get()(this)
+                }
+            },
+            gui = true
+        ) as BodyInfo
     }
 
     fun data(): BodyData {
@@ -62,6 +78,7 @@ class Body(
         this.data = data
         trailStep = max(10, min((data.distanceToNextBody / 20000).toInt(), 200))
         moveTo(data.position.asPosition())
+        info.body = data
     }
 
     fun enableTrail(trail: Boolean = true): Body {
@@ -70,6 +87,7 @@ class Body(
     }
 
     override fun draw() {
+        drawDiameter = if (drawDiameter * currentScale > 0.1F) drawDiameter else 0.11F / currentScale
         with(Context.applet) {
             drawTrail()
             drawBody()
@@ -78,7 +96,7 @@ class Body(
 
     override fun mousePressed(event: MouseEvent) {
         val mouseToCenter = lastPosition - event.realPosition()
-        if (sqrt(mouseToCenter.x.pow(2) + mouseToCenter.y.pow(2)) <= drawDiameter / 2) {
+        if (!Context.insideGuiComponent() && sqrt(mouseToCenter.x.pow(2) + mouseToCenter.y.pow(2)) <= drawDiameter / 2) {
             if (this.action.isPresent) {
                 this.action.get()(this)
             }
@@ -150,10 +168,10 @@ class Body(
 
 }
 
-private fun Coordinates.asPosition(): Position {
+fun Coordinates.asPosition(): Position {
     return Position(this.x.toFloat(), this.y.toFloat())
 }
 
-private fun Position.asCoordinates(): Coordinates {
+fun Position.asCoordinates(): Coordinates {
     return Coordinates(this.x.toDouble(), this.y.toDouble())
 }

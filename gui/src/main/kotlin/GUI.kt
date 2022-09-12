@@ -1,29 +1,120 @@
 package de.arindy.swingby.gui
 
 import de.arindy.swingby.gui.core.Context
-import de.arindy.swingby.gui.core.components.Button
 import de.arindy.swingby.gui.core.components.Coordinates
+import de.arindy.swingby.gui.core.components.Label
+import de.arindy.swingby.gui.core.components.TextField
+import de.arindy.swingby.gui.core.components.Toggle
 import de.arindy.swingby.gui.core.units.Position
+import de.arindy.swingby.gui.core.units.Size
+import processing.core.PApplet
+import processing.core.PConstants.LEFT
+import java.text.DecimalFormat
 
 class GUI {
 
+    private val decimalFormat = DecimalFormat("#.0#")
+
+    private var elapsedTimeLabel = Label(
+        name = { "" },
+        position = Position(175F, 10F),
+        size = Size(100F, 25F),
+        horizontalAlign = PApplet.LEFT,
+        textSize = 12F
+    )
+
+    private var elapsedRealTimeLabel = Label(
+        name = { "" },
+        position = Position(175F, 45F),
+        size = Size(100F, 25F),
+        horizontalAlign = PApplet.LEFT,
+        textSize = 12F
+    )
+
     fun build(
-        buttonActions: Map<String, () -> Unit> = HashMap()
-    ) {
+        animate: Map<String, () -> Unit> = HashMap(),
+        centerOnScreen: Map<String, () -> Unit> = HashMap(),
+        timeFactor: Map<String, (String, String) -> Unit> = HashMap(),
+    ): GUI {
         with(Context) {
             register(
-                Button(
-                    position = Position(220F, 10F),
-                    name = "Animate"
-                ).registerAction("Debug") { println("Button Animate pressed") }
-                    .registerActions(buttonActions),
+                Label(
+                    name = { "Elapsed Time in s:" },
+                    position = Position(10F, 10F),
+                    size = Size(170F, 25F),
+                    horizontalAlign = LEFT,
+                    textSize = 12F
+                ),
                 gui = true
             )
+            register(
+                elapsedTimeLabel,
+                gui = true
+            )
+            register(
+                Label(
+                    name = { "Elapsed RealTime in d:" },
+                    position = Position(10F, 45F),
+                    size = Size(170F, 25F),
+                    horizontalAlign = LEFT,
+                    textSize = 12F
+                ),
+                gui = true
+            )
+            register(
+                elapsedRealTimeLabel,
+                gui = true
+            )
+            register(
+                Label(
+                    position = Position(10F, 80F),
+                    size = Size(85F, 25F),
+                    name = { "TimeFactor:" },
+                    horizontalAlign = LEFT,
+                    textSize = 12F
+                ),
+                gui = true
+            )
+            register(
+                TextField(
+                    position = Position(100F, 80F),
+                    size = Size(100F, 25F),
+                    value = "100000",
+                    name = { "TimeFactor" }
+                ).register(timeFactor),
+                gui = true
+            )
+            register(
+                Toggle(
+                    position = Position(10F, 115F),
+                    name = { "Animate" }
+                ).registerAction("Debug") { println("Button \"Animate\" pressed") }
+                    .registerActions(animate),
+                gui = true
+            )
+            register(
+                Toggle(
+                    position = Position(10F, 150F),
+                    name = { "Center on Screen" }
+                ).registerAction("Debug") { println("Button \"Center on Screen\" pressed") }
+                    .registerActions(centerOnScreen),
+                gui = true
+            )
+
             register(
                 Coordinates(),
                 gui = true
             )
         }
+        return this
+    }
+
+    fun updateElapsedTime(elapsedTime: Float) {
+        elapsedTimeLabel.name = { decimalFormat.format(elapsedTime) }
+    }
+
+    fun updateElapsedRealTime(elapsedTimeDays: Float) {
+        elapsedRealTimeLabel.name = { "$elapsedTimeDays" }
     }
 
 }

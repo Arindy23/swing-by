@@ -10,7 +10,7 @@ object Colors {
 
     val primaryInverted = Color(
         background = "0x00880088",
-        foreground = "0x222222",
+        foreground = "0x000000",
         selected = "0x00FF00"
     )
 
@@ -34,7 +34,7 @@ object Colors {
 
     val cassini = Color(
         background = "0x008888",
-        foreground = "0x222222",
+        foreground = "0x008888",
         selected = "0x00FFFF"
     )
 

@@ -17,7 +17,7 @@ import processing.core.PConstants.CENTER
 class FPSCounter(
     override var position: Position = Position.ZERO,
     override var size: Size = Size(80F, 20F),
-    override var name: String = ""
+    override var name: () -> String = { "" }
 ) : Component {
 
     override fun draw() {

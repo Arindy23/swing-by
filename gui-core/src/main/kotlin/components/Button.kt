@@ -14,12 +14,12 @@ import processing.core.PConstants.CENTER
 import processing.event.MouseEvent
 import java.util.*
 
-class Button(
-    override val position: Position,
-    override val size: Size = Size(100F, 25F),
-    override val name: String,
-    private val color: Color = Colors.primaryInverted,
-    private val colorPressed: Color = Colors.primary,
+open class Button(
+    override var position: Position,
+    override val size: Size = Size(175F, 25F),
+    override val name: () -> String,
+    var color: Color = Colors.primaryInverted,
+    var colorPressed: Color = Colors.primary,
 ) : Component {
 
     private val valueReceivers: HashMap<String, () -> Unit> = HashMap()
@@ -56,7 +56,7 @@ class Button(
                 fill(foreground)
                 textSize(16F)
                 textAlign(CENTER, CENTER)
-                text(name, position.x + size.width / 2, position.y - 4F + size.height / 2)
+                text(name(), position.x + size.width / 2, position.y - 4F + size.height / 2)
             }
         }
     }

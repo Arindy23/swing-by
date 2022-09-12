@@ -1,6 +1,7 @@
 package de.arindy.swingby.gui.core.units
 
 data class Position(val x: Float, val y: Float) {
+
     companion object {
         val ZERO: Position = Position(0F, 0F)
     }
@@ -28,4 +29,8 @@ data class Position(val x: Float, val y: Float) {
     operator fun times(skalar: Float): Position {
         return Position((this.x.toDouble() * skalar).toFloat(), (this.y.toDouble() * skalar).toFloat())
     }
+}
+
+fun middle(first: Position, second: Position): Position {
+    return Position((first.x + second.x) / 2, (first.y + second.y) / 2)
 }

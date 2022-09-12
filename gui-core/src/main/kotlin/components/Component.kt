@@ -19,7 +19,7 @@ interface Component {
     val size: Size
     val componentName: String
         get() = this.javaClass.simpleName
-    val name: String
+    val name: () -> String
     val dimensions: Dimensions
         get() = Dimensions(position, size)
 

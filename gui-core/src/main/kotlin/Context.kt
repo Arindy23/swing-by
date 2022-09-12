@@ -23,12 +23,13 @@ object Context {
         Context.applet = applet
     }
 
-    fun register(component: Component, gui: Boolean = false) {
+    fun register(component: Component, gui: Boolean = false): Component {
         if (gui) {
             guiComponents.add(component)
         } else {
             components.add(component)
         }
+        return component
     }
 
     fun unregister(component: Component, gui: Boolean = false) {

@@ -28,7 +28,7 @@ import java.util.*
 class TextField(
     override var position: Position,
     override var size: Size = Size(200F, 25F),
-    override var name: String = "TestTextField",
+    override var name: () -> String,
     private var value: String = "",
     private val color: Color = Colors.primary,
     validCharacters: String = "\\wöÖäÄüÜß-"
@@ -40,8 +40,9 @@ class TextField(
     private var index = value.length
     private var marked = IntRange.EMPTY
 
-    fun register(actions: Map<String, (oldValue: String, newValue: String) -> Unit>) {
+    fun register(actions: Map<String, (oldValue: String, newValue: String) -> Unit>): TextField {
         actions.forEach { register(it.key, it.value) }
+        return this
     }
 
     fun register(
@@ -220,10 +221,6 @@ class TextField(
 
     override fun toString(): String {
         return asString()
-    }
-
-    fun doubleValue(): Double {
-        return value.toDoubleOrNull() ?: 0.0
     }
 }
 
