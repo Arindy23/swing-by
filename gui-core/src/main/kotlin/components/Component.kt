@@ -58,5 +58,8 @@ interface Component {
         return "$componentName[\"$name\", ($dimensions)]"
     }
 
+    fun hasShortcut(): Boolean {
+        return false
+    }
 
 }

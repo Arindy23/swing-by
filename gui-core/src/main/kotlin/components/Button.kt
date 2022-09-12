@@ -11,6 +11,7 @@ import de.arindy.swingby.gui.core.units.Colors
 import de.arindy.swingby.gui.core.units.Position
 import de.arindy.swingby.gui.core.units.Size
 import processing.core.PConstants.CENTER
+import processing.event.KeyEvent
 import processing.event.MouseEvent
 import java.util.*
 
@@ -20,6 +21,7 @@ open class Button(
     override val name: () -> String,
     var color: Color = Colors.primaryInverted,
     var colorPressed: Color = Colors.primary,
+    open var shortcutKey: Int = -1
 ) : Component {
 
     private val valueReceivers: HashMap<String, () -> Unit> = HashMap()
@@ -59,6 +61,16 @@ open class Button(
                 text(name(), position.x + size.width / 2, position.y - 4F + size.height / 2)
             }
         }
+    }
+
+    override fun onKeyPressed(event: KeyEvent) {
+        if (event.keyCode == shortcutKey) {
+            valueReceivers.forEach { it.value() }
+        }
+    }
+
+    override fun hasShortcut(): Boolean {
+        return shortcutKey > 0
     }
 
     override fun mousePressed(event: MouseEvent) {

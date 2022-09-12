@@ -9,6 +9,8 @@ import de.arindy.swingby.gui.core.units.Position
 import de.arindy.swingby.gui.core.units.Size
 import processing.core.PApplet
 import processing.core.PConstants.LEFT
+import java.awt.event.KeyEvent.VK_C
+import java.awt.event.KeyEvent.VK_SPACE
 import java.text.DecimalFormat
 
 class GUI {
@@ -87,17 +89,17 @@ class GUI {
             register(
                 Toggle(
                     position = Position(10F, 115F),
-                    name = { "Animate" }
-                ).registerAction("Debug") { println("Button \"Animate\" pressed") }
-                    .registerActions(animate),
+                    name = { "Animate" },
+                    shortcutKey = VK_SPACE
+                ).registerActions(animate),
                 gui = true
             )
             register(
                 Toggle(
                     position = Position(10F, 150F),
-                    name = { "Center on Screen" }
-                ).registerAction("Debug") { println("Button \"Center on Screen\" pressed") }
-                    .registerActions(centerOnScreen),
+                    name = { "Center on Screen" },
+                    shortcutKey = VK_C
+                ).registerActions(centerOnScreen),
                 gui = true
             )
 

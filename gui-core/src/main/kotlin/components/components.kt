@@ -10,7 +10,7 @@ fun ImmutableList<Component>.draw() {
 }
 
 fun ImmutableList<Component>.keyPressed(event: KeyEvent) {
-    val focusedComponents = this.filter { component -> component.isFocused() }
+    val focusedComponents = this.filter { component -> component.isFocused() || component.hasShortcut() }
     focusedComponents.forEach{ it.onKeyPressed(event)}
 }
 
