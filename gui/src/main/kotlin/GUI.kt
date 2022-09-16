@@ -81,8 +81,8 @@ class GUI {
                 TextField(
                     position = Position(100F, 80F),
                     size = Size(100F, 25F),
-                    value = "100000",
-                    name = { "TimeFactor" }
+                    value = { "100000" },
+                    name = { "TimeFactor" },
                 ).register(timeFactor),
                 gui = true
             )

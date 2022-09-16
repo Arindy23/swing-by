@@ -19,25 +19,26 @@ import processing.event.KeyEvent
 import processing.event.MouseEvent
 import java.awt.event.KeyEvent.VK_A
 import java.awt.event.KeyEvent.VK_END
+import java.awt.event.KeyEvent.VK_ENTER
 import java.awt.event.KeyEvent.VK_HOME
 import java.awt.event.KeyEvent.VK_LEFT
 import java.awt.event.KeyEvent.VK_RIGHT
 import java.util.*
 
-@Suppress("RegExpDuplicateCharacterInClass", "RegExpDuplicateCharacterInClass", "RegExpDuplicateCharacterInClass")
 class TextField(
     override var position: Position,
     override var size: Size = Size(200F, 25F),
     override var name: () -> String,
-    private var value: String = "",
+    private var value: () -> String = { "" },
     private val color: Color = Colors.primary,
-    validCharacters: String = "\\wöÖäÄüÜß-"
+    validCharacters: String = ".\\wöÖäÄüÜß-",
+    private val textSize: Float = 16F,
 ) : Component {
     private val validChars = Regex("[$validCharacters]")
     private val valueReceivers: HashMap<String, ((String, String) -> Unit)> = HashMap()
 
     private var focused = false
-    private var index = value.length
+    private var index = value().length
     private var marked = IntRange.EMPTY
 
     fun register(actions: Map<String, (oldValue: String, newValue: String) -> Unit>): TextField {
@@ -66,7 +67,7 @@ class TextField(
                 rect(position, size)
             }
             inMatrix {
-                textSize(16F)
+                textSize(textSize)
                 textAlign(LEFT, PConstants.CENTER)
                 var x = position.x + 2F
                 val message = valueWithCursor()
@@ -85,22 +86,27 @@ class TextField(
 
     private fun valueWithCursor(): String {
         return if (isFocused() && secondElapsed(0.5F)) {
-            value.insert('|', index)
+            value().insert('|', index)
+        } else if (isFocused()) {
+            value().insert(' ', index)
         } else {
-            value.insert(' ', index)
+            value()
         }
     }
 
     override fun mouseReleased(event: MouseEvent) {
+        if (!focused) {
+            index = value().length
+        }
         focused = inside(event.position())
     }
 
     override fun onKeyPressed(event: KeyEvent) {
         if (event.isControlDown && event.keyCode == VK_A) {
             selectAll()
-        } else if (event.key == BACKSPACE && value.isNotEmpty()) {
+        } else if (event.key == BACKSPACE && value().isNotEmpty() && index != 0) {
             onBackspace()
-        } else if (event.key == DELETE && value.isNotEmpty() && index < value.length) {
+        } else if (event.key == DELETE && value().isNotEmpty() && index < value().length) {
             onDelete()
         } else if (event.keyCode == VK_HOME) {
             onHome(event)
@@ -108,10 +114,12 @@ class TextField(
             onEnd(event)
         } else if (event.keyCode == VK_LEFT && index > 0) {
             onLeft(event)
-        } else if (event.keyCode == VK_RIGHT && index < value.length) {
+        } else if (event.keyCode == VK_RIGHT && index < value().length) {
             onRight(event)
         } else if (event.key.toString().matches(validChars)) {
             validChar(event)
+        } else if (event.keyCode == VK_ENTER) {
+            valueReceivers.forEach { it.value(value(), value()) }
         }
     }
 
@@ -119,7 +127,7 @@ class TextField(
         val tempValue = if (!marked.isEmpty()) {
             removeMarked()
         } else {
-            value
+            value()
         }
         if (textFitsField(tempValue)) {
             changeValue(tempValue.insert(event.key, index))
@@ -165,11 +173,11 @@ class TextField(
 
     private fun onEnd(event: KeyEvent) {
         marked = if (event.isShiftDown) {
-            IntRange(index, value.length)
+            IntRange(index, value().length)
         } else {
             IntRange.EMPTY
         }
-        index = value.length
+        index = value().length
     }
 
     private fun onHome(event: KeyEvent) {
@@ -183,7 +191,7 @@ class TextField(
 
     private fun onDelete() {
         val newValue = if (marked.isEmpty()) {
-            value.removeRange(index, index + 1)
+            value().removeRange(index, index + 1)
         } else {
             removeMarked()
         }
@@ -191,14 +199,14 @@ class TextField(
     }
 
     private fun selectAll() {
-        marked = IntRange(0, value.length)
+        marked = IntRange(0, value().length)
         index = 0
     }
 
     private fun onBackspace() {
         val newValue = if (marked.isEmpty()) {
             index--
-            value.removeRange(index, index + 1)
+            value().removeRange(index, index + 1)
         } else {
             removeMarked()
         }
@@ -206,13 +214,13 @@ class TextField(
     }
 
     private fun removeMarked(): String {
-        return value.removeRange(marked.first, marked.last)
+        return value().removeRange(marked.first, marked.last)
     }
 
     private fun changeValue(newValue: String) {
         marked = IntRange.EMPTY
-        valueReceivers.forEach { it.value(value, newValue) }
-        value = newValue
+        valueReceivers.forEach { it.value(value(), newValue) }
+        this.value = { newValue }
     }
 
     override fun isFocused(): Boolean {

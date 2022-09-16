@@ -28,11 +28,11 @@ import de.arindy.swingby.core.data.Body as BodyData
 class Body(
     override var position: Position,
     infoPosition: Position,
-    val diameter: Float,
+    var diameter: Float,
     private var drawDiameter: Float = diameter,
     override var size: Size = Size(drawDiameter, drawDiameter),
     override var name: () -> String,
-    private val color: Color,
+    private var color: Color,
     private var trail: Boolean = false,
     mass: Double,
     velocity2D: Velocity2D
@@ -60,11 +60,17 @@ class Body(
                 infoPosition,
                 body = data,
                 name = name,
-                color = { color }
+                color = color
             ).follow {
-                run {
-                    this.action.get()(this)
-                }
+                this.action.get()(this)
+            }.changePosition {
+                this.positions.clear()
+                this.positions.add(it)
+                this.lastPosition = it
+            }.changeData {
+                this.data = it
+            }.changeColor {
+                this.color = it
             },
             gui = true
         ) as BodyInfo
@@ -87,6 +93,9 @@ class Body(
     }
 
     override fun draw() {
+        this.diameter = data.diameter.toFloat()
+        this.drawDiameter = this.diameter
+        this.size = Size(this.diameter, this.diameter)
         drawDiameter = if (drawDiameter * currentScale > 0.1F) drawDiameter else 0.11F / currentScale
         with(Context.applet) {
             drawTrail()

@@ -26,7 +26,7 @@ fun color(color: String): String {
     return color.padEnd(10, 'F')
 }
 
-private fun notAValidHexCode(color: String) =
+fun notAValidHexCode(color: String) =
     !color.startsWith("0x")
         || color.length > 10
         || color.length < 3

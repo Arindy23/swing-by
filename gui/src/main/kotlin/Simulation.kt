@@ -75,7 +75,7 @@ class Simulation : PApplet() {
             x = 2.8E8.toFloat(),
             y = 6.5E8.toFloat(),
         ),
-        infoPosition = Position(10F, 360F),
+        infoPosition = Position(10F, 380F),
         mass = 4641.0,
 
         velocity2D = Velocity2D(
