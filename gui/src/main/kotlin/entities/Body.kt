@@ -18,7 +18,6 @@ import de.arindy.swingby.gui.core.units.Position
 import de.arindy.swingby.gui.core.units.Size
 import processing.core.PApplet
 import processing.event.MouseEvent
-import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
@@ -38,7 +37,7 @@ class Body(
     velocity2D: Velocity2D
 ) : Component {
 
-    private var action: Optional<(Body) -> Unit> = Optional.empty()
+    private var action: (Body) -> Unit = {}
     private val positions: ArrayList<Position> = ArrayList()
     private var stepCounter: Int = 1
     var lastPosition: Position = position
@@ -62,7 +61,7 @@ class Body(
                 name = name,
                 color = color
             ).follow {
-                this.action.get()(this)
+                this.action(this)
             }.changePosition {
                 this.positions.clear()
                 this.positions.add(it)
@@ -106,9 +105,7 @@ class Body(
     override fun mousePressed(event: MouseEvent) {
         val mouseToCenter = lastPosition - event.realPosition()
         if (!Context.insideGuiComponent() && sqrt(mouseToCenter.x.pow(2) + mouseToCenter.y.pow(2)) <= drawDiameter / 2) {
-            if (this.action.isPresent) {
-                this.action.get()(this)
-            }
+            action(this)
         }
     }
 
@@ -167,7 +164,7 @@ class Body(
     }
 
     fun onClick(action: (Body) -> Unit): Body {
-        this.action = Optional.of(action)
+        this.action = action
         return this
     }
 

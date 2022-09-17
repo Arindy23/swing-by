@@ -37,7 +37,6 @@ import processing.event.MouseEvent
 import java.awt.Font
 import java.awt.Font.BOLD
 import java.awt.Font.MONOSPACED
-import java.util.*
 
 class Simulation : PApplet() {
 
@@ -47,7 +46,7 @@ class Simulation : PApplet() {
 
     private val fpsCounter = FPSCounter()
     private var mouseClickedPosition: Position = Position.ZERO
-    private var following: Optional<Body> = Optional.empty()
+    private var following: Body? = null
     private var animate = false
     private var centerOnScreen = false
     private lateinit var gui: GUI
@@ -98,7 +97,7 @@ class Simulation : PApplet() {
         name = { "Unfollow" },
         position = Position.ZERO,
         size = Size(100F, 25F)
-    ).registerAction { following = Optional.empty() }
+    ).registerAction { following = null }
 
     override fun settings() {
         size(1240, 768)
@@ -141,7 +140,7 @@ class Simulation : PApplet() {
     }
 
     private fun centerOnScreen() {
-        following = Optional.empty()
+        following = null
         currentScale = min(
             resolution().width / (abs(cassini.lastPosition.x - jupiter.lastPosition.x) * 2F),
             resolution().height / (abs(cassini.lastPosition.y - jupiter.lastPosition.y) * 2F),
@@ -153,13 +152,13 @@ class Simulation : PApplet() {
     }
 
     private fun tryFollow(it: Body) =
-        if ((following.isEmpty || following.get() != it)) {
+        if (following != it) {
             if (it.diameter * currentScale > resolution().height / 2) {
                 currentScale = resolution().height / (it.diameter * 2F)
             }
-            Optional.of(it)
+            it
         } else {
-            Optional.empty()
+            null
         }
 
     private fun setupSurface() {
@@ -190,11 +189,13 @@ class Simulation : PApplet() {
         }
         if (centerOnScreen) {
             centerOnScreen()
-        } else if (following.isPresent) {
-            currentTranslation = -following.get().lastPosition + Position(
-                (resolution().width / currentScale) / 2,
-                (resolution().height) / currentScale / 2
-            )
+        } else {
+            following?.let {
+                currentTranslation = -it.lastPosition + Position(
+                    (resolution().width / currentScale) / 2,
+                    (resolution().height) / currentScale / 2
+                )
+            }
         }
         inMatrix {
             scaleWithContext(currentScale)
@@ -207,8 +208,12 @@ class Simulation : PApplet() {
     }
 
     private fun drawFollow() {
-        if (!centerOnScreen && following.isPresent) {
-            followingLabel.name = { "Following: ${if (following.isPresent) following.get().name() else ""}" }
+        if (centerOnScreen || following == null) {
+            unregister(followingLabel, gui = true)
+            unregister(unfollow, gui = true)
+        }
+        following?.takeIf { !centerOnScreen }?.let {
+            followingLabel.name = { "Following: ${it.name()}" }
             followingLabel.position = Position((resolution().width - followingLabel.size.width) / 2, 10F)
             unfollow.position = Position((resolution().width - 100F) / 2, 40F)
             register(
@@ -219,9 +224,6 @@ class Simulation : PApplet() {
                 unfollow,
                 gui = true
             )
-        } else {
-            unregister(followingLabel, gui = true)
-            unregister(unfollow, gui = true)
         }
     }
 
@@ -233,7 +235,7 @@ class Simulation : PApplet() {
                 register(fpsCounter, gui = true)
             }
         } else if (event.key == ESC) {
-            following = Optional.empty()
+            following = null
         }
         guiComponents().keyPressed(event)
     }
