@@ -8,44 +8,15 @@ import kotlin.math.sqrt
 
 private const val G = 6.67384E-20
 
-fun squaredTimeStep(distance: Double, probeVelocity: Double, incrementFactor: Double): Double {
-    return distance / (sqrt(probeVelocity) * (incrementFactor * 10))
-}
-
-fun linearTimeStep(distance: Double, probeVelocity: Double, incrementFactor: Double): Double {
-    return distance / (probeVelocity * (incrementFactor * 10))
-}
-
 fun calculateSwingByStep(
-    body: Body,
-    other: Body,
+    bodies: Map<String, Body>,
     timeStep: Double
-): Pair<Body, Body> {
-    val nextBody = nextBody(
-        body,
-        other,
-        timeStep
-    )
-    val nextOther =
-        if (other.distanceToNextBody > 0 && (other.distanceToNextBody) <= (body.diameter + other.diameter) / 2) {
-            Body(
-                position = Coordinates(
-                    x = other.position.x + timeStep * nextBody.velocity2D.x,
-                    y = other.position.y + timeStep * nextBody.velocity2D.y,
-                ),
-                velocity2D = nextBody.velocity2D,
-                mass = other.mass,
-                diameter = other.diameter,
-                distanceToNextBody = other.distanceToNextBody
-            )
-        } else {
-            nextBody(
-                other,
-                body,
-                timeStep
-            )
-        }
-    return Pair(nextBody, nextOther)
+): Map<String, Body> {
+    return bodies.keys.associateWith {
+        val others = HashMap(bodies)
+        val bodyToCalculate = others.remove(it)!!
+        nextBody(bodyToCalculate, others.values, timeStep)
+    }
 }
 
 fun distance(first: Coordinates, second: Coordinates): Double {
@@ -55,12 +26,12 @@ fun distance(first: Coordinates, second: Coordinates): Double {
     )
 }
 
-private fun nextBody(body: Body, other: Body, timeStep: Double): Body {
+private fun nextBody(body: Body, others: MutableCollection<Body>, timeStep: Double): Body {
     val nextVelocity =
         nextVelocity(
             body,
-            other,
-            timeStep
+            others,
+            timeStep = timeStep
         )
     val nextPosition = nextPosition(body, nextVelocity, timeStep)
     return Body(
@@ -68,15 +39,23 @@ private fun nextBody(body: Body, other: Body, timeStep: Double): Body {
         velocity2D = nextVelocity,
         mass = body.mass,
         diameter = body.diameter,
-        distanceToNextBody = distance(body.position, other.position)
+        distanceToNextBody = others.map { distance(body.position, it.position) }.min()
     )
 }
 
-private fun nextVelocity(body: Body, other: Body, timeStep: Double): Velocity2D {
-    val distance = distance(body.position, other.position)
+private fun nextVelocity(body: Body, others: MutableCollection<Body>, timeStep: Double): Velocity2D {
+    val (x, y) = others.map {
+        val distance = distance(body.position, it.position)
+        Pair(
+            it.mass / distance.pow(3) * (body.position.x - it.position.x),
+            it.mass / distance.pow(3) * (body.position.y - it.position.y)
+        )
+    }.reduce { acc, pair ->
+        Pair(acc.first + pair.first, acc.second + pair.second)
+    }
     return Velocity2D(
-        x = body.velocity2D.x - G * other.mass / distance.pow(3) * (body.position.x - other.position.x) * timeStep,
-        y = body.velocity2D.y - G * other.mass / distance.pow(3) * (body.position.y - other.position.y) * timeStep,
+        x = body.velocity2D.x - G * x * timeStep,
+        y = body.velocity2D.y - G * y * timeStep,
     )
 }
 

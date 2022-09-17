@@ -89,6 +89,13 @@ object Context {
         return currentTranslation + mousePosition() / currentScale
     }
 
+    fun coordinatesInCenter(): Position {
+        return -currentTranslation + Position(
+            (resolution().width / currentScale) / 2,
+            (resolution().height) / currentScale / 2
+        )
+    }
+
     fun PApplet.inMatrix(block: () -> Unit) {
         pushMatrix()
         block()

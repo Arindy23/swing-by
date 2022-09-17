@@ -2,6 +2,7 @@ package de.arindy.swingby.gui
 
 import de.arindy.swingby.core.calculateSwingByStep
 import de.arindy.swingby.core.data.Velocity2D
+import de.arindy.swingby.core.distance
 import de.arindy.swingby.gui.core.Context
 import de.arindy.swingby.gui.core.Context.components
 import de.arindy.swingby.gui.core.Context.currentScale
@@ -31,6 +32,7 @@ import de.arindy.swingby.gui.core.units.Position
 import de.arindy.swingby.gui.core.units.Size
 import de.arindy.swingby.gui.core.units.middle
 import de.arindy.swingby.gui.entities.Body
+import de.arindy.swingby.gui.entities.asCoordinates
 import processing.core.PApplet
 import processing.core.PFont
 import processing.event.KeyEvent
@@ -53,43 +55,44 @@ class Simulation : PApplet() {
     private lateinit var gui: GUI
     private val bodyLabels: ArrayList<Pair<Label, Button>> = ArrayList()
 
-    private val jupiter = Body(
-        name = { "Jupiter" },
-        color = Colors.jupiter,
-        diameter = 139822F,
-        position = {
-            Position(
-                x = 3.569001017514159E8.toFloat(),
-                y = 5.877375047510158E8.toFloat(),
+    private val bodies: MutableList<Body> = mutableListOf(
+        Body(
+            name = { "Jupiter" },
+            color = Colors.jupiter,
+            diameter = 139822F,
+            position = {
+                Position(
+                    x = 3.569001017514159E8.toFloat(),
+                    y = 5.877375047510158E8.toFloat(),
+                )
+            },
+            mass = 1.899E27,
+            velocity2D = Velocity2D(
+                x = 6.1,
+                y = -12.0
             )
-        },
-        mass = 1.899E27,
-        velocity2D = Velocity2D(
-            x = 6.1,
-            y = -12.0
-        )
-    )
-    private val cassini = Body(
-        name = { "Cassini" },
-        color = Colors.cassini,
-        diameter = 0F,
-        position = {
-            Position(
-                x = 3.554614806656895E8.toFloat(),
-                y = 5.879277724825814E8.toFloat(),
+        ),
+        Body(
+            name = { "Cassini" },
+            color = Colors.cassini,
+            diameter = 0F,
+            position = {
+                Position(
+                    x = 3.554614806656895E8.toFloat(),
+                    y = 5.879277724825814E8.toFloat(),
+                )
+            },
+            mass = 4641.0,
+            velocity2D = Velocity2D(
+                x = -1.43657077142615,
+                y = -17.018430251489907
             )
-        },
-        mass = 4641.0,
-        velocity2D = Velocity2D(
-            x = -1.43657077142615,
-            y = -17.018430251489907
         )
     )
 
     private var timeFactor = 100000.0
     private var elapsedTime = 0F
     private var elapsedTimeDays = 0F
-    private var minDistance = -1F
 
     override fun settings() {
         size(1240, 768)
@@ -100,9 +103,8 @@ class Simulation : PApplet() {
         frameRate(1440f)
         background(0x000000)
         textFont(PFont(Font(MONOSPACED, BOLD, 5), true))
-        with(Context) {
-            registerBody(cassini)
-            registerBody(jupiter)
+        bodies.forEach {
+            with(Context) { registerBody(it) }
         }
         bodyLabels.forEach {
             register(it.first, gui = true)
@@ -122,12 +124,36 @@ class Simulation : PApplet() {
                 }
             }),
         )
+        register(
+            Button(
+                position = { Position(10F, 200f + (bodyLabels.size + 1) * 25F) },
+                name = { "add Body " }
+            ).registerAction {
+                with(Context) {
+                    val body = Body(
+                        name = { "new Body" },
+                        color = Colors.primary,
+                        diameter = 0F,
+                        position = { coordinatesInCenter() },
+                        mass = 0.0,
+                        velocity2D = Velocity2D(
+                            x = 0.0,
+                            y = 0.0
+                        )
+                    )
+                    val (label, button) = registerBody(body)
+                    bodies.add(body)
+                    register(label, gui = true)
+                    register(button, gui = true)
+                }
+            }, gui = true
+        )
         centerOnScreen()
     }
 
-    private fun Context.registerBody(body: Body) {
+    private fun Context.registerBody(body: Body): Pair<Label, Button> {
         val verticalPosition = bodyLabels.size * 25F
-        bodyLabels.add(Pair(
+        val result = Pair(
             Label(
                 position = { Position(10F, 200F + verticalPosition) },
                 size = Size(width = 100F, 20F),
@@ -143,7 +169,8 @@ class Simulation : PApplet() {
             ).registerAction {
                 body.toggleInfo()
             }
-        ))
+        )
+        bodyLabels.add(result)
         register(
             body.enableTrail().onClick(
                 action = {
@@ -151,18 +178,35 @@ class Simulation : PApplet() {
                 }
             ),
         )
+        return result
     }
 
     private fun centerOnScreen() {
         following = following?.unfollow()
+        var mostAppartBodies: Pair<Body, Body>? = null
+        for (i in 1 until bodies.size) {
+            bodies.filterIndexed { index, _ -> index != i }.forEach { body ->
+                var oldDistance = 0.0
+                mostAppartBodies?.let {
+                    oldDistance = distance(
+                        it.first.lastPosition.asCoordinates(),
+                        it.second.lastPosition.asCoordinates()
+                    )
+                }
+                if (oldDistance < distance(bodies[i].lastPosition.asCoordinates(), body.lastPosition.asCoordinates())) {
+                    mostAppartBodies = Pair(bodies[i], body)
+                }
+            }
+        }
         currentScale = min(
-            resolution().width / (abs(cassini.lastPosition.x - jupiter.lastPosition.x) * 2F),
-            resolution().height / (abs(cassini.lastPosition.y - jupiter.lastPosition.y) * 2F),
+            resolution().width / (abs(mostAppartBodies!!.first.lastPosition.x - mostAppartBodies!!.second.lastPosition.x) * 2F),
+            resolution().height / (abs(mostAppartBodies!!.first.lastPosition.y - mostAppartBodies!!.second.lastPosition.y) * 2F),
         )
-        currentTranslation = -middle(jupiter.lastPosition, cassini.lastPosition) + Position(
-            (resolution().width / currentScale) / 2,
-            (resolution().height) / currentScale / 2
-        )
+        currentTranslation =
+            -middle(mostAppartBodies!!.first.lastPosition, mostAppartBodies!!.second.lastPosition) + Position(
+                (resolution().width / currentScale) / 2,
+                (resolution().height) / currentScale / 2
+            )
     }
 
     private fun tryFollow(it: Body): Body? {
@@ -186,22 +230,13 @@ class Simulation : PApplet() {
     override fun draw() {
         background(0x000000)
         if (animate) {
-            val (body, other) = calculateSwingByStep(
-                jupiter.data(),
-                cassini.data(),
-                deltaTime * timeFactor
-            )
+            val newBodies =
+                calculateSwingByStep(this.bodies.associate { it.name() to it.data() }, deltaTime * timeFactor)
             elapsedTime += deltaTime
             elapsedTimeDays += (deltaTime * timeFactor / 3600 / 24).toFloat()
             gui.updateElapsedTime(elapsedTime)
             gui.updateElapsedRealTime(elapsedTimeDays)
-            jupiter.update(body)
-            cassini.update(other)
-            minDistance = if (
-                minDistance < 0 ||
-                minDistance > cassini.data().distanceToNextBody
-            ) cassini.data().distanceToNextBody.toFloat()
-            else minDistance
+            bodies.forEach { newBodies[it.name()]?.let { newBody -> it.update(newBody) } }
         }
         if (centerOnScreen) {
             centerOnScreen()
