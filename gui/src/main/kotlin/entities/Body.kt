@@ -8,6 +8,7 @@ import de.arindy.swingby.gui.core.Context.currentTranslation
 import de.arindy.swingby.gui.core.Context.inMatrix
 import de.arindy.swingby.gui.core.Context.isRegistered
 import de.arindy.swingby.gui.core.Context.register
+import de.arindy.swingby.gui.core.Context.unregister
 import de.arindy.swingby.gui.core.components.Component
 import de.arindy.swingby.gui.core.components.Label
 import de.arindy.swingby.gui.core.ellipse
@@ -66,7 +67,7 @@ class Body(
             ), gui = true
         ) as Label
         info = BodyInfo(
-            { labelPosition() + Position(100F, 0F) },
+            { labelPosition() + Position(15F, 10F) },
             body = data,
             name = name,
             color = color
@@ -203,8 +204,10 @@ class Body(
 
     fun toggleInfo() {
         if (infoVisible()) {
+            register(label, gui = true)
             info.hide()
         } else {
+            unregister(label, gui = true)
             info.show()
         }
     }

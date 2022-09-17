@@ -59,14 +59,14 @@ class Simulation : PApplet() {
         diameter = 139822F,
         position = {
             Position(
-                x = 3.1E8.toFloat(),
-                y = 6.8E8.toFloat(),
+                x = 3.569001017514159E8.toFloat(),
+                y = 5.877375047510158E8.toFloat(),
             )
         },
         mass = 1.899E27,
         velocity2D = Velocity2D(
-            y = -12.0,
-            x = 6.1
+            x = 6.1,
+            y = -12.0
         )
     )
     private val cassini = Body(
@@ -75,14 +75,14 @@ class Simulation : PApplet() {
         diameter = 0F,
         position = {
             Position(
-                x = 2.8E8.toFloat(),
-                y = 6.5E8.toFloat(),
+                x = 3.554614806656895E8.toFloat(),
+                y = 5.879277724825814E8.toFloat(),
             )
         },
         mass = 4641.0,
         velocity2D = Velocity2D(
-            y = -8.9,
-            x = 9.5
+            x = -1.43657077142615,
+            y = -17.018430251489907
         )
     )
 
