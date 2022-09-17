@@ -1,6 +1,7 @@
 package de.arindy.swingby.gui.core.components
 
 import de.arindy.swingby.gui.core.Context
+import de.arindy.swingby.gui.core.Context.componentsHaveFocus
 import de.arindy.swingby.gui.core.Context.inMatrix
 import de.arindy.swingby.gui.core.fill
 import de.arindy.swingby.gui.core.position
@@ -16,11 +17,11 @@ import processing.event.MouseEvent
 import java.util.*
 
 open class Button(
-    override var position: Position,
+    override var position: () -> Position,
     override val size: Size = Size(175F, 25F),
     override val name: () -> String,
-    var color: Color = Colors.primaryInverted,
-    var colorPressed: Color = Colors.primary,
+    var color: () -> Color = { Colors.primaryInverted },
+    var colorPressed: () -> Color = { Colors.primary },
     open var shortcutKey: Int = -1
 ) : Component {
 
@@ -39,32 +40,32 @@ open class Button(
 
     override fun draw() {
         val foreground = if (pressed) {
-            colorPressed.foreground
+            colorPressed().foreground
         } else {
-            color.foreground
+            color().foreground
         }
         val background = if (pressed) {
-            colorPressed.background
+            colorPressed().background
         } else {
-            color.background
+            color().background
         }
         with(Context.applet) {
             inMatrix {
                 stroke(foreground)
                 fill(background)
-                rect(position, size)
+                rect(position(), size)
             }
             inMatrix {
                 fill(foreground)
                 textSize(16F)
                 textAlign(CENTER, CENTER)
-                text(name(), position.x + size.width / 2, position.y - 4F + size.height / 2)
+                text(name(), position().x + size.width / 2, position().y - 4F + size.height / 2)
             }
         }
     }
 
     override fun onKeyPressed(event: KeyEvent) {
-        if (event.keyCode == shortcutKey) {
+        if (!componentsHaveFocus() && event.keyCode == shortcutKey) {
             valueReceivers.forEach { it.value() }
         }
     }

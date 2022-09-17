@@ -15,13 +15,13 @@ import processing.event.MouseEvent
 
 interface Component {
 
-    val position: Position
+    val position: () -> Position
     val size: Size
     val componentName: String
         get() = this.javaClass.simpleName
     val name: () -> String
     val dimensions: Dimensions
-        get() = Dimensions(position, size)
+        get() = Dimensions(position(), size)
 
     fun draw() {
         with(applet) {

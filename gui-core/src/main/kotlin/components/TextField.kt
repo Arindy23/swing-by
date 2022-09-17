@@ -26,7 +26,7 @@ import java.awt.event.KeyEvent.VK_RIGHT
 import java.util.*
 
 class TextField(
-    override var position: Position,
+    override var position: () -> Position,
     override var size: Size = Size(200F, 25F),
     override var name: () -> String,
     private var value: () -> String = { "" },
@@ -67,12 +67,12 @@ class TextField(
             inMatrix {
                 stroke(color.foreground)
                 fill(color.background)
-                rect(position, size)
+                rect(position(), size)
             }
             inMatrix {
                 textSize(textSize)
                 textAlign(LEFT, PConstants.CENTER)
-                var x = position.x + 2F
+                var x = position().x + 2F
                 val message = valueWithCursor()
                 for (i in message.indices) {
                     if (marked.contains(i) && i != index) {
@@ -80,12 +80,12 @@ class TextField(
                     } else {
                         fill(color.foreground)
                     }
-                    text(message[i], x, position.y - 4F + size.height / 2)
+                    text(message[i], x, position().y - 4F + size.height / 2)
                     x += textWidth(message[i])
                 }
                 if (value() != newValue()) {
                     fill("0xFF0000")
-                    text("*", position.x + size.width - 7F, position.y - 4F + size.height / 2)
+                    text("*", position().x + size.width - 7F, position().y - 4F + size.height / 2)
                 }
             }
         }
@@ -233,7 +233,8 @@ class TextField(
         marked = IntRange.EMPTY
         if (!changeOnEnter) {
             valueReceivers.forEach { it.value(value(), newValue) }
-            this.newValue = value
+            this.newValue = { newValue }
+            this.value = { newValue }
         } else {
             this.newValue = { newValue }
         }

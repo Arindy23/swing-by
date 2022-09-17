@@ -16,6 +16,7 @@ import de.arindy.swingby.gui.core.Context.updateDeltaTime
 import de.arindy.swingby.gui.core.components.Button
 import de.arindy.swingby.gui.core.components.FPSCounter
 import de.arindy.swingby.gui.core.components.Label
+import de.arindy.swingby.gui.core.components.Toggle
 import de.arindy.swingby.gui.core.components.draw
 import de.arindy.swingby.gui.core.components.keyPressed
 import de.arindy.swingby.gui.core.components.mouseDragged
@@ -50,16 +51,18 @@ class Simulation : PApplet() {
     private var animate = false
     private var centerOnScreen = false
     private lateinit var gui: GUI
+    private val bodyLabels: ArrayList<Pair<Label, Button>> = ArrayList()
 
     private val jupiter = Body(
         name = { "Jupiter" },
         color = Colors.jupiter,
         diameter = 139822F,
-        position = Position(
-            x = 3.1E8.toFloat(),
-            y = 6.8E8.toFloat(),
-        ),
-        infoPosition = Position(10F, 190F),
+        position = {
+            Position(
+                x = 3.1E8.toFloat(),
+                y = 6.8E8.toFloat(),
+            )
+        },
         mass = 1.899E27,
         velocity2D = Velocity2D(
             y = -12.0,
@@ -70,13 +73,13 @@ class Simulation : PApplet() {
         name = { "Cassini" },
         color = Colors.cassini,
         diameter = 0F,
-        position = Position(
-            x = 2.8E8.toFloat(),
-            y = 6.5E8.toFloat(),
-        ),
-        infoPosition = Position(10F, 420F),
+        position = {
+            Position(
+                x = 2.8E8.toFloat(),
+                y = 6.5E8.toFloat(),
+            )
+        },
         mass = 4641.0,
-
         velocity2D = Velocity2D(
             y = -8.9,
             x = 9.5
@@ -87,17 +90,6 @@ class Simulation : PApplet() {
     private var elapsedTime = 0F
     private var elapsedTimeDays = 0F
     private var minDistance = -1F
-
-    private val followingLabel = Label(
-        name = { "" },
-        position = Position.ZERO
-    )
-
-    private val unfollow = Button(
-        name = { "Unfollow" },
-        position = Position.ZERO,
-        size = Size(100F, 25F)
-    ).registerAction { following = null }
 
     override fun settings() {
         size(1240, 768)
@@ -111,6 +103,10 @@ class Simulation : PApplet() {
         with(Context) {
             registerBody(cassini)
             registerBody(jupiter)
+        }
+        bodyLabels.forEach {
+            register(it.first, gui = true)
+            register(it.second, gui = true)
         }
         gui = GUI().build(
             animate = mapOf(Pair("animate") {
@@ -130,6 +126,24 @@ class Simulation : PApplet() {
     }
 
     private fun Context.registerBody(body: Body) {
+        val verticalPosition = bodyLabels.size * 25F
+        bodyLabels.add(Pair(
+            Label(
+                position = { Position(10F, 200F + verticalPosition) },
+                size = Size(width = 100F, 20F),
+                name = { body.name() },
+                color = { body.color },
+                textSize = 16F
+            ),
+            Toggle(
+                position = { Position(120F, 200F + verticalPosition) },
+                size = Size(width = 100F, 20F),
+                name = { if (body.infoVisible()) "hide info" else "show info" },
+                toggle = { body.infoVisible() }
+            ).registerAction {
+                body.toggleInfo()
+            }
+        ))
         register(
             body.enableTrail().onClick(
                 action = {
@@ -140,7 +154,7 @@ class Simulation : PApplet() {
     }
 
     private fun centerOnScreen() {
-        following = null
+        following = following?.unfollow()
         currentScale = min(
             resolution().width / (abs(cassini.lastPosition.x - jupiter.lastPosition.x) * 2F),
             resolution().height / (abs(cassini.lastPosition.y - jupiter.lastPosition.y) * 2F),
@@ -151,15 +165,17 @@ class Simulation : PApplet() {
         )
     }
 
-    private fun tryFollow(it: Body) =
-        if (following != it) {
+    private fun tryFollow(it: Body): Body? {
+        following?.unfollow()
+        return if (following != it) {
             if (it.diameter * currentScale > resolution().height / 2) {
                 currentScale = resolution().height / (it.diameter * 2F)
             }
-            it
+            it.follow()
         } else {
             null
         }
+    }
 
     private fun setupSurface() {
         surface.setIcon(loadImage(icon))
@@ -203,28 +219,7 @@ class Simulation : PApplet() {
             components().draw()
         }
         guiComponents().draw()
-        drawFollow()
         updateDeltaTime(System.currentTimeMillis())
-    }
-
-    private fun drawFollow() {
-        if (centerOnScreen || following == null) {
-            unregister(followingLabel, gui = true)
-            unregister(unfollow, gui = true)
-        }
-        following?.takeIf { !centerOnScreen }?.let {
-            followingLabel.name = { "Following: ${it.name()}" }
-            followingLabel.position = Position((resolution().width - followingLabel.size.width) / 2, 10F)
-            unfollow.position = Position((resolution().width - 100F) / 2, 40F)
-            register(
-                followingLabel,
-                gui = true
-            )
-            register(
-                unfollow,
-                gui = true
-            )
-        }
     }
 
     override fun keyPressed(event: KeyEvent) {

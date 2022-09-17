@@ -15,13 +15,13 @@ import processing.core.PApplet
 import processing.core.PConstants.CENTER
 
 class FPSCounter(
-    override var position: Position = Position.ZERO,
+    override var position: () -> Position = { Position.ZERO },
     override var size: Size = Size(80F, 20F),
     override var name: () -> String = { "" }
 ) : Component {
 
     override fun draw() {
-        position = Position(resolution().width - 90F, 10F)
+        position = { Position(resolution().width - 90F, 10F) }
         with(applet) {
             drawText()
         }
@@ -43,7 +43,11 @@ class FPSCounter(
             fill(color)
             textSize(15F)
             textAlign(CENTER, CENTER)
-            text("${frameRate.toInt()} ($deltaTime)", position.x + 2F + size.width / 2, position.y - 2F + size.height / 2)
+            text(
+                "${frameRate.toInt()} ($deltaTime)",
+                position().x + 2F + size.width / 2,
+                position().y - 2F + size.height / 2
+            )
         }
     }
 

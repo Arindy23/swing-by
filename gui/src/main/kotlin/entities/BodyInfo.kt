@@ -4,10 +4,12 @@ import de.arindy.swingby.core.data.Body
 import de.arindy.swingby.core.data.Coordinates
 import de.arindy.swingby.core.data.Velocity2D
 import de.arindy.swingby.gui.core.Context
-import de.arindy.swingby.gui.core.components.Button
+import de.arindy.swingby.gui.core.Context.register
+import de.arindy.swingby.gui.core.Context.unregister
 import de.arindy.swingby.gui.core.components.Component
 import de.arindy.swingby.gui.core.components.Label
 import de.arindy.swingby.gui.core.components.TextField
+import de.arindy.swingby.gui.core.components.Toggle
 import de.arindy.swingby.gui.core.fill
 import de.arindy.swingby.gui.core.notAValidHexCode
 import de.arindy.swingby.gui.core.rect
@@ -21,11 +23,12 @@ import java.text.NumberFormat
 import kotlin.math.round
 
 class BodyInfo(
-    override val position: Position,
+    override val position: () -> Position,
     override val size: Size = Size(width = 280F, 220F),
     var body: Body,
     private var color: Color,
     override val name: () -> String,
+    following: () -> Boolean,
 ) : Component {
 
     private var followFunction: () -> Unit = {}
@@ -34,38 +37,36 @@ class BodyInfo(
     private var changeColorFunction: (Color) -> Unit = {}
     private var changeNameFunction: (String) -> Unit = {}
     private val decimalFormat: DecimalFormat = DecimalFormat("#.0#")
+    private val components: ArrayList<Component> = ArrayList()
 
     init {
-        with(Context) {
-            register(
+        components.addAll(
+            listOf(
                 TextField(
-                    position = Position(position.x + 5F, position.y + 5F),
+                    position = { Position(position().x + 5F, position().y + 5F) },
                     size = Size(width = (size.width - 15F) / 2, 25F),
                     name = name,
                     value = name
-                ).register { _, newValue -> changeNameFunction(newValue) }, gui = true
-            )
-            register(
-                Button(
-                    position = Position(position.x + 5F + (size.width - 10F) / 2, position.y + 5F),
+                ).register { _, newValue ->
+                    changeNameFunction(newValue)
+                },
+                Toggle(
+                    position = { Position(position().x + 5F + (size.width - 10F) / 2, position().y + 5F) },
                     size = Size(width = (size.width - 10F) / 2, 25F),
-                    name = { "follow" }
+                    name = { if (following()) "unfollow" else "follow" },
+                    toggle = following
                 ).registerAction {
                     run { followFunction() }
-                }, gui = true
-            )
-            register(
+                },
                 Label(
-                    position = Position(position.x + 5F, position.y + 35F),
+                    position = { Position(position().x + 5F, position().y + 35F) },
                     size = Size(width = size.width / 2 - 25F, 18F),
                     name = { "Color:" },
                     textSize = 12F,
                     horizontalAlign = LEFT
-                ), gui = true
-            )
-            register(
+                ),
                 TextField(
-                    position = Position(position.x + 120F, position.y + 35F),
+                    position = { Position(position().x + 120F, position().y + 35F) },
                     size = Size(width = size.width / 2 + 15F, 18F),
                     name = { color.foreground },
                     value = { color.foreground },
@@ -81,20 +82,16 @@ class BodyInfo(
                         changeColorFunction(color)
                     }
                     updateDataFunction(body)
-                }, gui = true
-            )
-            register(
+                },
                 Label(
-                    position = Position(position.x + 5F, position.y + 55F),
+                    position = { Position(position().x + 5F, position().y + 55F) },
                     size = Size(width = size.width / 2 - 25F, 18F),
                     name = { "Mass in kg:" },
                     textSize = 12F,
                     horizontalAlign = LEFT
-                ), gui = true
-            )
-            register(
+                ),
                 TextField(
-                    position = Position(position.x + 120F, position.y + 55F),
+                    position = { Position(position().x + 120F, position().y + 55F) },
                     size = Size(width = size.width / 2 + 15F, 18F),
                     name = { "${body.mass}" },
                     value = { body.mass.toString() },
@@ -109,20 +106,16 @@ class BodyInfo(
                         distanceToNextBody = body.distanceToNextBody
                     )
                     updateDataFunction(body)
-                }, gui = true
-            )
-            register(
+                },
                 Label(
-                    position = Position(position.x + 5F, position.y + 75F),
+                    position = { Position(position().x + 5F, position().y + 75F) },
                     size = Size(width = size.width / 2 - 25F, 18F),
                     name = { "Diameter in km:" },
                     horizontalAlign = LEFT,
                     textSize = 12F
-                ), gui = true
-            )
-            register(
+                ),
                 TextField(
-                    position = Position(position.x + 120F, position.y + 75F),
+                    position = { Position(position().x + 120F, position().y + 75F) },
                     size = Size(width = size.width / 2 + 15F, 18F),
                     name = { "${body.diameter}" },
                     value = { body.diameter.toString() },
@@ -137,20 +130,16 @@ class BodyInfo(
                         distanceToNextBody = body.distanceToNextBody
                     )
                     updateDataFunction(body)
-                }, gui = true
-            )
-            register(
+                },
                 Label(
-                    position = Position(position.x + 5F, position.y + 95F),
+                    position = { Position(position().x + 5F, position().y + 95F) },
                     size = Size(width = size.width / 2 - 25F, 18F),
                     name = { "X-coordinate:" },
                     horizontalAlign = LEFT,
                     textSize = 12F
-                ), gui = true
-            )
-            register(
+                ),
                 TextField(
-                    position = Position(position.x + 120F, position.y + 95F),
+                    position = { Position(position().x + 120F, position().y + 95F) },
                     size = Size(width = size.width / 2 + 15F, 18F),
                     name = { "${body.position.x}" },
                     value = { body.position.x.toString() },
@@ -166,20 +155,16 @@ class BodyInfo(
                     )
                     changePositionFunction(body.position.asPosition())
                     updateDataFunction(body)
-                }, gui = true
-            )
-            register(
+                },
                 Label(
-                    position = Position(position.x + 5F, position.y + 115F),
+                    position = { Position(position().x + 5F, position().y + 115F) },
                     size = Size(width = size.width / 2 - 15F, 18F),
                     name = { "Y-coordinate:" },
                     horizontalAlign = LEFT,
                     textSize = 12F
-                ), gui = true
-            )
-            register(
+                ),
                 TextField(
-                    position = Position(position.x + 120F, position.y + 115F),
+                    position = { Position(position().x + 120F, position().y + 115F) },
                     size = Size(width = size.width / 2 + 15F, 18F),
                     name = { "${body.position.y}" },
                     value = { body.position.y.toString() },
@@ -195,20 +180,16 @@ class BodyInfo(
                     )
                     changePositionFunction(body.position.asPosition())
                     updateDataFunction(body)
-                }, gui = true
-            )
-            register(
+                },
                 Label(
-                    position = Position(position.x + 5F, position.y + 135F),
+                    position = { Position(position().x + 5F, position().y + 135F) },
                     size = Size(width = size.width / 2 - 15F, 18F),
                     name = { "X-velocity:" },
                     horizontalAlign = LEFT,
                     textSize = 12F
-                ), gui = true
-            )
-            register(
+                ),
                 TextField(
-                    position = Position(position.x + 120F, position.y + 135F),
+                    position = { Position(position().x + 120F, position().y + 135F) },
                     size = Size(width = size.width / 2 + 15F, 18F),
                     name = { "${body.velocity2D.x}" },
                     value = { body.velocity2D.x.toString() },
@@ -223,20 +204,16 @@ class BodyInfo(
                         distanceToNextBody = body.distanceToNextBody
                     )
                     updateDataFunction(body)
-                }, gui = true
-            )
-            register(
+                },
                 Label(
-                    position = Position(position.x + 5F, position.y + 155F),
+                    position = { Position(position().x + 5F, position().y + 155F) },
                     size = Size(width = size.width / 2 - 15F, 18F),
                     name = { "Y-velocity:" },
                     horizontalAlign = LEFT,
                     textSize = 12F
-                ), gui = true
-            )
-            register(
+                ),
                 TextField(
-                    position = Position(position.x + 120F, position.y + 155F),
+                    position = { Position(position().x + 120F, position().y + 155F) },
                     size = Size(width = size.width / 2 + 15F, 18F),
                     name = { "${body.velocity2D.y}" },
                     value = { body.velocity2D.y.toString() },
@@ -251,26 +228,36 @@ class BodyInfo(
                         distanceToNextBody = body.distanceToNextBody
                     )
                     updateDataFunction(body)
-                }, gui = true
-            )
-            register(
+                },
                 Label(
-                    position = Position(position.x + 5F, position.y + 175F),
+                    position = { Position(position().x + 5F, position().y + 175F) },
                     size = Size(width = size.width - 10F, 18F),
                     name = { "Distance to next Body: ${round(body.distanceToNextBody * 1E4 / 1E4)}" },
                     horizontalAlign = LEFT,
                     textSize = 12F
-                ), gui = true
-            )
-            register(
+                ),
                 Label(
-                    position = Position(position.x + 5F, position.y + 195F),
+                    position = { Position(position().x + 5F, position().y + 195F) },
                     size = Size(width = size.width - 10F, 18F),
                     name = { "Speed in km/s: " + decimalFormat.format(body.velocity) },
                     horizontalAlign = LEFT,
                     textSize = 12F
-                ), gui = true
+                )
             )
+        )
+    }
+
+    fun show() {
+        register(this, gui = true)
+        components.forEach {
+            register(it, gui = true)
+        }
+    }
+
+    fun hide() {
+        unregister(this, gui = true)
+        components.forEach {
+            unregister(it, gui = true)
         }
     }
 
@@ -278,7 +265,7 @@ class BodyInfo(
         with(Context.applet) {
             stroke(color.foreground)
             fill(color.background.replaceRange(IntRange(7, 8), "11"))
-            rect(position, size)
+            rect(position(), size)
         }
     }
 

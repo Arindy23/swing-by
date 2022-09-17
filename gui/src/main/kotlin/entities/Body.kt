@@ -6,13 +6,13 @@ import de.arindy.swingby.gui.core.Context
 import de.arindy.swingby.gui.core.Context.currentScale
 import de.arindy.swingby.gui.core.Context.currentTranslation
 import de.arindy.swingby.gui.core.Context.inMatrix
+import de.arindy.swingby.gui.core.Context.isRegistered
 import de.arindy.swingby.gui.core.Context.register
 import de.arindy.swingby.gui.core.components.Component
 import de.arindy.swingby.gui.core.components.Label
 import de.arindy.swingby.gui.core.ellipse
 import de.arindy.swingby.gui.core.fill
 import de.arindy.swingby.gui.core.line
-import de.arindy.swingby.gui.core.realPosition
 import de.arindy.swingby.gui.core.stroke
 import de.arindy.swingby.gui.core.units.Color
 import de.arindy.swingby.gui.core.units.Direction
@@ -20,21 +20,17 @@ import de.arindy.swingby.gui.core.units.Position
 import de.arindy.swingby.gui.core.units.Size
 import processing.core.PApplet
 import processing.core.PConstants.LEFT
-import processing.event.MouseEvent
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.pow
-import kotlin.math.sqrt
 import de.arindy.swingby.core.data.Body as BodyData
 
 class Body(
-    override var position: Position,
-    infoPosition: Position,
+    override var position: () -> Position,
     var diameter: Float,
     private var drawDiameter: Float = diameter,
     override var size: Size = Size(drawDiameter, drawDiameter),
     override var name: () -> String,
-    private var color: Color,
+    var color: Color,
     private var trail: Boolean = false,
     mass: Double,
     velocity2D: Velocity2D
@@ -43,17 +39,17 @@ class Body(
     private var action: (Body) -> Unit = {}
     private val positions: ArrayList<Position> = ArrayList()
     private var stepCounter: Int = 1
-    var lastPosition: Position = position
+    var lastPosition: Position = position()
     private var data: BodyData
     private var trailStep: Int
     private val info: BodyInfo
     private val label: Label
-    private var labelPosition = Position.ZERO
+    var following: Boolean = false
 
     init {
-        positions.add(position)
+        positions.add(position())
         data = BodyData(
-            position = position.asCoordinates(),
+            position = position().asCoordinates(),
             velocity2D = velocity2D,
             mass = mass,
             diameter = diameter.toDouble()
@@ -61,37 +57,39 @@ class Body(
         trailStep = 200
         label = register(
             Label(
-                position = labelPosition,
+                position = { labelPosition() },
                 size = Size(40F, 20F),
                 name = name,
                 textSize = 12F,
                 horizontalAlign = LEFT,
-                color = color
+                color = { color }
             ), gui = true
         ) as Label
-        info = register(
-            BodyInfo(
-                infoPosition,
-                body = data,
-                name = name,
-                color = color
-            ).follow {
-                this.action(this)
-            }.changePosition {
-                this.positions.clear()
-                this.positions.add(it)
-                this.lastPosition = it
-            }.changeData {
-                this.data = it
-            }.changeColor {
-                this.color = it
-                label.color = it
-            }.changeName {
-                this.name = { it }
-                label.name = { it }
-            },
-            gui = true
-        ) as BodyInfo
+        info = BodyInfo(
+            { labelPosition() + Position(100F, 0F) },
+            body = data,
+            name = name,
+            color = color
+        ) { following }.follow {
+            this.action(follow())
+        }.changePosition {
+            this.positions.clear()
+            this.positions.add(it)
+            this.lastPosition = it
+        }.changeData {
+            this.data = it
+        }.changeColor {
+            this.color = it
+            label.color = { it }
+        }.changeName {
+            this.name = { it }
+            label.name = { it }
+        }
+    }
+
+    private fun labelPosition(): Position {
+        return (lastPosition + Position(diameter / 2 + 10F / currentScale, -(diameter / 2 + 30F / currentScale))
+            + currentTranslation) * currentScale
     }
 
     fun data(): BodyData {
@@ -111,10 +109,6 @@ class Body(
     }
 
     override fun draw() {
-        label.position = (
-            lastPosition + Position(diameter / 2 + 10F / currentScale, -(diameter / 2 + 30F / currentScale))
-                + currentTranslation
-            ) * currentScale
         this.diameter = data.diameter.toFloat()
         this.drawDiameter = this.diameter
         this.size = Size(this.diameter, this.diameter)
@@ -123,13 +117,6 @@ class Body(
             drawTrail()
             drawBody()
             drawLabelPointer()
-        }
-    }
-
-    override fun mousePressed(event: MouseEvent) {
-        val mouseToCenter = lastPosition - event.realPosition()
-        if (!Context.insideGuiComponent() && sqrt(mouseToCenter.x.pow(2) + mouseToCenter.y.pow(2)) <= drawDiameter / 2) {
-            action(this)
         }
     }
 
@@ -202,6 +189,28 @@ class Body(
     fun onClick(action: (Body) -> Unit): Body {
         this.action = action
         return this
+    }
+
+    fun follow(): Body {
+        this.following = true
+        return this
+    }
+
+    fun unfollow(): Body? {
+        this.following = false
+        return null
+    }
+
+    fun toggleInfo() {
+        if (infoVisible()) {
+            info.hide()
+        } else {
+            info.show()
+        }
+    }
+
+    fun infoVisible(): Boolean {
+        return isRegistered(info, gui = true)
     }
 
     companion object {

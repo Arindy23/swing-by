@@ -18,16 +18,16 @@ class GUI {
     private val decimalFormat = DecimalFormat("#.0#")
 
     private var elapsedTimeLabel = Label(
-        name = { "" },
-        position = Position(175F, 10F),
+        name = { "0" },
+        position = { Position(175F, 10F) },
         size = Size(100F, 25F),
         horizontalAlign = PApplet.LEFT,
-        textSize = 12F
+        textSize = 12F,
     )
 
     private var elapsedRealTimeLabel = Label(
-        name = { "" },
-        position = Position(175F, 45F),
+        name = { "0" },
+        position = { Position(175F, 45F) },
         size = Size(100F, 25F),
         horizontalAlign = PApplet.LEFT,
         textSize = 12F
@@ -42,7 +42,7 @@ class GUI {
             register(
                 Label(
                     name = { "Elapsed Time in s:" },
-                    position = Position(10F, 10F),
+                    position = { Position(10F, 10F) },
                     size = Size(170F, 25F),
                     horizontalAlign = LEFT,
                     textSize = 12F
@@ -56,7 +56,7 @@ class GUI {
             register(
                 Label(
                     name = { "Elapsed RealTime in d:" },
-                    position = Position(10F, 45F),
+                    position = { Position(10F, 45F) },
                     size = Size(170F, 25F),
                     horizontalAlign = LEFT,
                     textSize = 12F
@@ -69,7 +69,7 @@ class GUI {
             )
             register(
                 Label(
-                    position = Position(10F, 80F),
+                    position = { Position(10F, 80F) },
                     size = Size(85F, 25F),
                     name = { "TimeFactor:" },
                     horizontalAlign = LEFT,
@@ -79,7 +79,7 @@ class GUI {
             )
             register(
                 TextField(
-                    position = Position(100F, 80F),
+                    position = { Position(100F, 80F) },
                     size = Size(100F, 25F),
                     value = { "100000" },
                     name = { "TimeFactor" },
@@ -88,15 +88,15 @@ class GUI {
             )
             register(
                 Toggle(
-                    position = Position(10F, 115F),
+                    position = { Position(10F, 115F) },
                     name = { "Animate" },
-                    shortcutKey = VK_SPACE
+                    shortcutKey = VK_SPACE,
                 ).registerActions(animate),
                 gui = true
             )
             register(
                 Toggle(
-                    position = Position(10F, 150F),
+                    position = { Position(10F, 150F) },
                     name = { "Center on Screen" },
                     shortcutKey = VK_C
                 ).registerActions(centerOnScreen),

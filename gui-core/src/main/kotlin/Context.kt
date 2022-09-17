@@ -48,6 +48,10 @@ object Context {
         }
     }
 
+    fun componentsHaveFocus(): Boolean {
+        return components().any { it.isFocused() } || guiComponents().any { it.isFocused() }
+    }
+
     fun guiComponents(): ImmutableList<Component> {
         return guiComponents.toImmutableList()
     }
