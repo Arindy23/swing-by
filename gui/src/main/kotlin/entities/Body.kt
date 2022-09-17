@@ -86,6 +86,9 @@ class Body(
             }.changeColor {
                 this.color = it
                 label.color = it
+            }.changeName {
+                this.name = { it }
+                label.name = { it }
             },
             gui = true
         ) as BodyInfo

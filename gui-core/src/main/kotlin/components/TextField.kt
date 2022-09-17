@@ -135,7 +135,10 @@ class TextField(
         }
     }
 
-    private fun textFitsField(tempValue: String) = applet.textWidth(tempValue) + 16F <= size.width
+    private fun textFitsField(tempValue: String): Boolean {
+        applet.textSize(textSize)
+        return applet.textWidth(tempValue) + textSize <= size.width
+    }
 
     private fun onRight(event: KeyEvent) {
         marked = if (event.isShiftDown) {

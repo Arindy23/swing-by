@@ -31,16 +31,18 @@ class BodyInfo(
     private var changePositionFunction: (Position) -> Unit = {}
     private var updateDataFunction: (Body) -> Unit = {}
     private var changeColorFunction: (Color) -> Unit = {}
+    private var changeNameFunction: (String) -> Unit = {}
     private val decimalFormat: DecimalFormat = DecimalFormat("#.0#")
 
     init {
         with(Context) {
             register(
-                Label(
+                TextField(
                     position = Position(position.x + 5F, position.y + 5F),
-                    size = Size(width = (size.width - 10F) / 2, 25F),
-                    name = { name() }
-                ), gui = true
+                    size = Size(width = (size.width - 15F) / 2, 25F),
+                    name = name,
+                    value = name
+                ).register { _, newValue -> changeNameFunction(newValue) }, gui = true
             )
             register(
                 Button(
@@ -242,6 +244,11 @@ class BodyInfo(
 
     fun changeColor(function: (Color) -> Unit): BodyInfo {
         this.changeColorFunction = function
+        return this
+    }
+
+    fun changeName(function: (String) -> Unit): BodyInfo {
+        this.changeNameFunction = function
         return this
     }
 }
