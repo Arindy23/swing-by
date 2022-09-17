@@ -2,6 +2,7 @@ package de.arindy.swingby.gui.entities
 
 import de.arindy.swingby.core.data.Body
 import de.arindy.swingby.core.data.Coordinates
+import de.arindy.swingby.core.data.Velocity2D
 import de.arindy.swingby.gui.core.Context
 import de.arindy.swingby.gui.core.components.Button
 import de.arindy.swingby.gui.core.components.Component
@@ -21,7 +22,7 @@ import kotlin.math.round
 
 class BodyInfo(
     override val position: Position,
-    override val size: Size = Size(width = 280F, 180F),
+    override val size: Size = Size(width = 280F, 220F),
     var body: Body,
     private var color: Color,
     override val name: () -> String,
@@ -195,6 +196,60 @@ class BodyInfo(
             register(
                 Label(
                     position = Position(position.x + 5F, position.y + 135F),
+                    size = Size(width = size.width / 2 - 15F, 18F),
+                    name = { "X-velocity:" },
+                    horizontalAlign = LEFT,
+                    textSize = 12F
+                ), gui = true
+            )
+            register(
+                TextField(
+                    position = Position(position.x + 120F, position.y + 135F),
+                    size = Size(width = size.width / 2 + 15F, 18F),
+                    name = { "${body.velocity2D.x}" },
+                    value = { body.velocity2D.x.toString() },
+                    textSize = 12F,
+                ).register { _, newValue ->
+                    body = Body(
+                        position = body.position,
+                        velocity2D = Velocity2D(newValue.toDoubleOrNull() ?: 0.0, body.velocity2D.y),
+                        mass = body.mass,
+                        diameter = body.diameter,
+                        distanceToNextBody = body.distanceToNextBody
+                    )
+                    updateDataFunction(body)
+                }, gui = true
+            )
+            register(
+                Label(
+                    position = Position(position.x + 5F, position.y + 155F),
+                    size = Size(width = size.width / 2 - 15F, 18F),
+                    name = { "Y-velocity:" },
+                    horizontalAlign = LEFT,
+                    textSize = 12F
+                ), gui = true
+            )
+            register(
+                TextField(
+                    position = Position(position.x + 120F, position.y + 155F),
+                    size = Size(width = size.width / 2 + 15F, 18F),
+                    name = { "${body.velocity2D.y}" },
+                    value = { body.velocity2D.y.toString() },
+                    textSize = 12F,
+                ).register { _, newValue ->
+                    body = Body(
+                        position = body.position,
+                        velocity2D = Velocity2D(body.velocity2D.x, newValue.toDoubleOrNull() ?: 0.0),
+                        mass = body.mass,
+                        diameter = body.diameter,
+                        distanceToNextBody = body.distanceToNextBody
+                    )
+                    updateDataFunction(body)
+                }, gui = true
+            )
+            register(
+                Label(
+                    position = Position(position.x + 5F, position.y + 175F),
                     size = Size(width = size.width - 10F, 18F),
                     name = { "Distance to next Body: ${round(body.distanceToNextBody * 1E4 / 1E4)}" },
                     horizontalAlign = LEFT,
@@ -203,7 +258,7 @@ class BodyInfo(
             )
             register(
                 Label(
-                    position = Position(position.x + 5F, position.y + 155F),
+                    position = Position(position.x + 5F, position.y + 195F),
                     size = Size(width = size.width - 10F, 18F),
                     name = { "Speed in km/s: " + decimalFormat.format(body.velocity) },
                     horizontalAlign = LEFT,
