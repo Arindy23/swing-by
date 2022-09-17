@@ -98,7 +98,8 @@ class BodyInfo(
                     size = Size(width = size.width / 2 + 15F, 18F),
                     name = { "${body.mass}" },
                     value = { body.mass.toString() },
-                    textSize = 12F
+                    textSize = 12F,
+                    changeOnEnter = true
                 ).register { _, newValue ->
                     body = Body(
                         position = body.position,
@@ -125,7 +126,8 @@ class BodyInfo(
                     size = Size(width = size.width / 2 + 15F, 18F),
                     name = { "${body.diameter}" },
                     value = { body.diameter.toString() },
-                    textSize = 12F
+                    textSize = 12F,
+                    changeOnEnter = true
                 ).register { _, newValue ->
                     body = Body(
                         position = body.position,
@@ -153,6 +155,7 @@ class BodyInfo(
                     name = { "${body.position.x}" },
                     value = { body.position.x.toString() },
                     textSize = 12F,
+                    changeOnEnter = true
                 ).register { _, newValue ->
                     body = Body(
                         position = Coordinates(newValue.toDoubleOrNull() ?: 0.0, body.position.y),
@@ -181,6 +184,7 @@ class BodyInfo(
                     name = { "${body.position.y}" },
                     value = { body.position.y.toString() },
                     textSize = 12F,
+                    changeOnEnter = true
                 ).register { _, newValue ->
                     body = Body(
                         position = Coordinates(body.position.x, newValue.toDoubleOrNull() ?: 0.0),
@@ -209,6 +213,7 @@ class BodyInfo(
                     name = { "${body.velocity2D.x}" },
                     value = { body.velocity2D.x.toString() },
                     textSize = 12F,
+                    changeOnEnter = true
                 ).register { _, newValue ->
                     body = Body(
                         position = body.position,
@@ -236,6 +241,7 @@ class BodyInfo(
                     name = { "${body.velocity2D.y}" },
                     value = { body.velocity2D.y.toString() },
                     textSize = 12F,
+                    changeOnEnter = true
                 ).register { _, newValue ->
                     body = Body(
                         position = body.position,
