@@ -14,7 +14,7 @@ open class Label(
     override var size: Size = Size(325F, 25F),
     override var name: () -> String = { "" },
     private val horizontalAlign: Int = CENTER,
-    private val color: Color = Colors.primary,
+    var color: Color = Colors.primary,
     private val textSize: Float = 16F
 ) : Component {
 

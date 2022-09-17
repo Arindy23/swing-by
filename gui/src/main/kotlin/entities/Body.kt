@@ -4,9 +4,11 @@ import de.arindy.swingby.core.data.Coordinates
 import de.arindy.swingby.core.data.Velocity2D
 import de.arindy.swingby.gui.core.Context
 import de.arindy.swingby.gui.core.Context.currentScale
+import de.arindy.swingby.gui.core.Context.currentTranslation
 import de.arindy.swingby.gui.core.Context.inMatrix
 import de.arindy.swingby.gui.core.Context.register
 import de.arindy.swingby.gui.core.components.Component
+import de.arindy.swingby.gui.core.components.Label
 import de.arindy.swingby.gui.core.ellipse
 import de.arindy.swingby.gui.core.fill
 import de.arindy.swingby.gui.core.line
@@ -17,6 +19,7 @@ import de.arindy.swingby.gui.core.units.Direction
 import de.arindy.swingby.gui.core.units.Position
 import de.arindy.swingby.gui.core.units.Size
 import processing.core.PApplet
+import processing.core.PConstants.LEFT
 import processing.event.MouseEvent
 import kotlin.math.max
 import kotlin.math.min
@@ -44,6 +47,8 @@ class Body(
     private var data: BodyData
     private var trailStep: Int
     private val info: BodyInfo
+    private val label: Label
+    private var labelPosition = Position.ZERO
 
     init {
         positions.add(position)
@@ -54,6 +59,16 @@ class Body(
             diameter = diameter.toDouble()
         )
         trailStep = 200
+        label = register(
+            Label(
+                position = labelPosition,
+                size = Size(40F, 20F),
+                name = name,
+                textSize = 12F,
+                horizontalAlign = LEFT,
+                color = color
+            ), gui = true
+        ) as Label
         info = register(
             BodyInfo(
                 infoPosition,
@@ -70,6 +85,7 @@ class Body(
                 this.data = it
             }.changeColor {
                 this.color = it
+                label.color = it
             },
             gui = true
         ) as BodyInfo
@@ -92,6 +108,10 @@ class Body(
     }
 
     override fun draw() {
+        label.position = (
+            lastPosition + Position(diameter / 2 + 10F / currentScale, -(diameter / 2 + 30F / currentScale))
+                + currentTranslation
+            ) * currentScale
         this.diameter = data.diameter.toFloat()
         this.drawDiameter = this.diameter
         this.size = Size(this.diameter, this.diameter)
@@ -99,6 +119,7 @@ class Body(
         with(Context.applet) {
             drawTrail()
             drawBody()
+            drawLabelPointer()
         }
     }
 
@@ -159,6 +180,18 @@ class Body(
                     }
                 }
             }
+            strokeWeight(1F)
+        }
+    }
+
+    private fun PApplet.drawLabelPointer() {
+        inMatrix {
+            strokeWeight(1 / currentScale)
+            stroke(color.background)
+            line(
+                lastPosition + Position(diameter / 2 + 5F / currentScale, -(diameter / 2 + 5F / currentScale)),
+                lastPosition + Position(diameter / 2 + 15F / currentScale, -(diameter / 2 + 15F / currentScale))
+            )
             strokeWeight(1F)
         }
     }
