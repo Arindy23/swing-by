@@ -91,7 +91,6 @@ class Simulation : PApplet() {
     )
 
     private var timeFactor = 100000.0
-    private var elapsedTime = 0F
     private var elapsedTimeDays = 0F
 
     override fun settings() {
@@ -126,7 +125,7 @@ class Simulation : PApplet() {
         )
         register(
             Button(
-                position = { Position(10F, 200f + (bodyLabels.size + 1) * 25F) },
+                position = { Position(10F, 160f + (bodyLabels.size + 1) * 25F) },
                 name = { "add Body " }
             ).registerAction {
                 with(Context) {
@@ -155,14 +154,14 @@ class Simulation : PApplet() {
         val verticalPosition = bodyLabels.size * 25F
         val result = Pair(
             Label(
-                position = { Position(10F, 200F + verticalPosition) },
+                position = { Position(10F, 160F + verticalPosition) },
                 size = Size(width = 100F, 20F),
                 name = { body.name() },
                 color = { body.color },
                 textSize = 16F
             ),
             Toggle(
-                position = { Position(120F, 200F + verticalPosition) },
+                position = { Position(120F, 160F + verticalPosition) },
                 size = Size(width = 100F, 20F),
                 name = { if (body.infoVisible()) "hide info" else "show info" },
                 toggle = { body.infoVisible() }
@@ -232,9 +231,7 @@ class Simulation : PApplet() {
         if (animate) {
             val newBodies =
                 calculateSwingByStep(this.bodies.associate { it.name() to it.data() }, deltaTime * timeFactor)
-            elapsedTime += deltaTime
             elapsedTimeDays += (deltaTime * timeFactor / 3600 / 24).toFloat()
-            gui.updateElapsedTime(elapsedTime)
             gui.updateElapsedRealTime(elapsedTimeDays)
             bodies.forEach { newBodies[it.name()]?.let { newBody -> it.update(newBody) } }
         }
