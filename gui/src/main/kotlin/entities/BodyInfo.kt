@@ -9,7 +9,6 @@ import de.arindy.swingby.gui.core.Context.unregister
 import de.arindy.swingby.gui.core.components.Component
 import de.arindy.swingby.gui.core.components.Label
 import de.arindy.swingby.gui.core.components.TextField
-import de.arindy.swingby.gui.core.components.Toggle
 import de.arindy.swingby.gui.core.fill
 import de.arindy.swingby.gui.core.notAValidHexCode
 import de.arindy.swingby.gui.core.rect
@@ -24,14 +23,12 @@ import kotlin.math.round
 
 class BodyInfo(
     override val position: () -> Position,
-    override val size: Size = Size(width = 280F, 220F),
+    override val size: Size,
     var body: Body,
     private var color: Color,
-    override val name: () -> String,
-    following: () -> Boolean,
+    override val name: () -> String
 ) : Component {
 
-    private var followFunction: () -> Unit = {}
     private var changePositionFunction: (Position) -> Unit = {}
     private var updateDataFunction: (Body) -> Unit = {}
     private var changeColorFunction: (Color) -> Unit = {}
@@ -43,20 +40,12 @@ class BodyInfo(
         components.addAll(
             listOf(
                 TextField(
-                    position = { Position(position().x + 5F, position().y + 5F) },
+                    position = { Position(position().x + (size.width) / 4, position().y + 5F) },
                     size = Size(width = (size.width - 15F) / 2, 25F),
                     name = name,
                     value = name
                 ).register { _, newValue ->
                     changeNameFunction(newValue)
-                },
-                Toggle(
-                    position = { Position(position().x + 5F + (size.width - 10F) / 2, position().y + 5F) },
-                    size = Size(width = (size.width - 10F) / 2, 25F),
-                    name = { if (following()) "unfollow" else "follow" },
-                    toggle = following
-                ).registerAction {
-                    run { followFunction() }
                 },
                 Label(
                     position = { Position(position().x + 5F, position().y + 35F) },
@@ -273,11 +262,6 @@ class BodyInfo(
         val numberFormat = NumberFormat.getInstance()
         numberFormat.maximumFractionDigits = digits
         return numberFormat.format(this)
-    }
-
-    fun follow(follow: () -> Unit): BodyInfo {
-        this.followFunction = follow
-        return this
     }
 
     fun changePosition(function: (Position) -> Unit): BodyInfo {

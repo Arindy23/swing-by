@@ -53,7 +53,7 @@ class Simulation : PApplet() {
     private var animate = false
     private var centerOnScreen = false
     private lateinit var gui: GUI
-    private val bodyLabels: ArrayList<Pair<Label, Button>> = ArrayList()
+    private val bodyLabels: ArrayList<Triple<Label, Button, Button>> = ArrayList()
 
     private val bodies: MutableList<Body> = mutableListOf(
         Body(
@@ -108,6 +108,7 @@ class Simulation : PApplet() {
         bodyLabels.forEach {
             register(it.first, gui = true)
             register(it.second, gui = true)
+            register(it.third, gui = true)
         }
         gui = GUI().build(
             animate = mapOf(Pair("animate") {
@@ -140,33 +141,42 @@ class Simulation : PApplet() {
                             y = 0.0
                         )
                     )
-                    val (label, button) = registerBody(body)
+                    val (label, info, follow) = registerBody(body)
                     bodies.add(body)
                     register(label, gui = true)
-                    register(button, gui = true)
+                    register(info, gui = true)
+                    register(follow, gui = true)
                 }
             }, gui = true
         )
         centerOnScreen()
     }
 
-    private fun Context.registerBody(body: Body): Pair<Label, Button> {
+    private fun Context.registerBody(body: Body): Triple<Label, Button, Button> {
         val verticalPosition = bodyLabels.size * 25F
-        val result = Pair(
+        val result = Triple(
             Label(
                 position = { Position(10F, 160F + verticalPosition) },
-                size = Size(width = 100F, 20F),
+                size = Size(width = 120F, 20F),
                 name = { body.name() },
                 color = { body.color },
-                textSize = 16F
+                textSize = 16F,
             ),
             Toggle(
-                position = { Position(120F, 160F + verticalPosition) },
+                position = { Position(140F, 160F + verticalPosition) },
                 size = Size(width = 100F, 20F),
                 name = { if (body.infoVisible()) "hide info" else "show info" },
                 toggle = { body.infoVisible() }
             ).registerAction {
                 body.toggleInfo()
+            },
+            Toggle(
+                position = { Position(245F, 160F + verticalPosition) },
+                size = Size(width = 20F, 20F),
+                name = { if (body.following) "⚑" else "⚐" },
+                toggle = { body.following }
+            ).registerAction {
+                following = tryFollow(body)
             }
         )
         bodyLabels.add(result)

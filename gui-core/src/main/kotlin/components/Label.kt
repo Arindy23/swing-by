@@ -1,8 +1,10 @@
 package de.arindy.swingby.gui.core.components
 
-import de.arindy.swingby.gui.core.Context
+import de.arindy.swingby.gui.core.Context.applet
 import de.arindy.swingby.gui.core.Context.inMatrix
 import de.arindy.swingby.gui.core.fill
+import de.arindy.swingby.gui.core.rect
+import de.arindy.swingby.gui.core.stroke
 import de.arindy.swingby.gui.core.units.Color
 import de.arindy.swingby.gui.core.units.Colors
 import de.arindy.swingby.gui.core.units.Position
@@ -15,14 +17,20 @@ open class Label(
     override var name: () -> String,
     private val horizontalAlign: Int = CENTER,
     var color: () -> Color = { Colors.primary },
-    private val textSize: Float = 16F
+    private val textSize: Float = 16F,
+    private val border: Boolean = false
 ) : Component {
 
     override fun draw() {
-        with(Context.applet) {
+        with(applet) {
             inMatrix {
-                fill(color().foreground)
                 textSize(textSize)
+                if (border) {
+                    stroke(color().foreground)
+                    noFill()
+                    rect(position(), size())
+                }
+                fill(color().foreground)
                 textAlign(horizontalAlign, CENTER)
                 text(
                     name(),
@@ -31,5 +39,14 @@ open class Label(
                 )
             }
         }
+    }
+
+    private fun size(): Size {
+        var result: Size = size
+        applet.inMatrix {
+            applet.textSize(textSize)
+            result = Size(applet.textWidth(name()) + textSize, (textSize * 1.4).toFloat())
+        }
+        return result
     }
 }

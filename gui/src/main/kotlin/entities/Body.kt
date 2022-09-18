@@ -2,10 +2,11 @@ package de.arindy.swingby.gui.entities
 
 import de.arindy.swingby.core.data.Coordinates
 import de.arindy.swingby.core.data.Velocity2D
-import de.arindy.swingby.gui.core.Context
+import de.arindy.swingby.gui.core.Context.applet
 import de.arindy.swingby.gui.core.Context.currentScale
 import de.arindy.swingby.gui.core.Context.currentTranslation
 import de.arindy.swingby.gui.core.Context.inMatrix
+import de.arindy.swingby.gui.core.Context.insideScreen
 import de.arindy.swingby.gui.core.Context.isRegistered
 import de.arindy.swingby.gui.core.Context.register
 import de.arindy.swingby.gui.core.Context.unregister
@@ -46,7 +47,7 @@ class Body(
     private var trailStep: Int
     private val info: BodyInfo
     private val label: Label
-    private var following: Boolean = false
+    var following: Boolean = false
 
     init {
         positions.add(position())
@@ -59,22 +60,22 @@ class Body(
         trailStep = 200
         label = register(
             Label(
-                position = { labelPosition() },
+                position = { insideScreen(labelPosition(), Size(applet.textWidth(name()) + 12F, 20F)) },
                 size = Size(40F, 20F),
                 name = name,
                 textSize = 12F,
                 horizontalAlign = LEFT,
-                color = { color }
+                color = { color },
             ), gui = true
         ) as Label
+        val bodInfoSize = Size(width = 280F, 220F)
         info = BodyInfo(
-            { labelPosition() + Position(15F, 10F) },
+            size = bodInfoSize,
+            position = { insideScreen(labelPosition() + Position(15F, 10F), bodInfoSize) },
             body = data,
             name = name,
             color = color
-        ) { following }.follow {
-            this.action(follow())
-        }.changePosition {
+        ).changePosition {
             this.positions.clear()
             this.positions.add(it)
             this.lastPosition = it
@@ -115,7 +116,7 @@ class Body(
         this.drawDiameter = this.diameter
         this.size = Size(this.diameter, this.diameter)
         drawDiameter = if (drawDiameter * currentScale > 0.1F) drawDiameter else 0.11F / currentScale
-        with(Context.applet) {
+        with(applet) {
             drawTrail()
             drawBody()
             drawLabelPointer()

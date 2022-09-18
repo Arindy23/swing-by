@@ -77,6 +77,17 @@ object Context {
         return elapsed <= delay
     }
 
+    fun insideScreen(position: Position, size: Size): Position {
+        return Position(
+            x = if (0F > position.x) 0F
+            else if (position.x + size.width > resolution().width) resolution().width - size.width
+            else position.x,
+            y = if (0F > position.y) 0F
+            else if (position.y + size.height > resolution().height) resolution().height - size.height
+            else position.y,
+        )
+    }
+
     fun resolution(): Size {
         return Size(applet.width.toFloat(), applet.height.toFloat())
     }
