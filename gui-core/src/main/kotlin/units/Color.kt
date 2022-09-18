@@ -1,6 +1,6 @@
 package de.arindy.swingby.gui.core.units
 
-import de.arindy.swingby.gui.core.color
+import de.arindy.swingby.gui.core.asHexColor
 import de.arindy.swingby.gui.core.invalidHex
 
 class Color(background: String, foreground: String, selected: String) {
@@ -10,9 +10,9 @@ class Color(background: String, foreground: String, selected: String) {
     val selected: String
 
     init {
-        this.background = color(background)
-        this.foreground = color(foreground)
-        this.selected = color(selected)
+        this.background = asHexColor(background)
+        this.foreground = asHexColor(foreground)
+        this.selected = asHexColor(selected)
     }
 
     override fun toString(): String {

@@ -6,20 +6,23 @@ import processing.core.PApplet
 import processing.event.MouseEvent
 
 fun PApplet.fill(color: String) {
-    val hexCode = color(color).substring(2)
-    this.fill(hexCode.toFloat(0, 2), hexCode.toFloat(2, 4), hexCode.toFloat(4, 6), hexCode.toFloat(6))
+    this.fill(color(color))
 }
 
 fun PApplet.stroke(color: String) {
-    val hexCode = color(color).substring(2)
-    this.stroke(hexCode.toFloat(0, 2), hexCode.toFloat(2, 4), hexCode.toFloat(4, 6), hexCode.toFloat(6))
+    this.stroke(color(color))
+}
+
+fun PApplet.color(color: String): Int {
+    val hexCode = asHexColor(color).substring(2)
+    return this.color(hexCode.toFloat(0, 2), hexCode.toFloat(2, 4), hexCode.toFloat(4, 6), hexCode.toFloat(6))
 }
 
 private fun String.toFloat(startIndex: Int, endIndex: Int = this.length): Float {
     return this.substring(startIndex, endIndex).toInt(16).toFloat()
 }
 
-fun color(color: String): String {
+fun asHexColor(color: String): String {
     if (notAValidHexCode(color)) {
         throw IllegalArgumentException("\"$color\" is not a valid color!")
     }

@@ -9,6 +9,7 @@ import de.arindy.swingby.gui.core.Context.inMatrix
 import de.arindy.swingby.gui.core.Context.isRegistered
 import de.arindy.swingby.gui.core.Context.register
 import de.arindy.swingby.gui.core.Context.unregister
+import de.arindy.swingby.gui.core.color
 import de.arindy.swingby.gui.core.components.Component
 import de.arindy.swingby.gui.core.components.Label
 import de.arindy.swingby.gui.core.ellipse
@@ -45,7 +46,7 @@ class Body(
     private var trailStep: Int
     private val info: BodyInfo
     private val label: Label
-    var following: Boolean = false
+    private var following: Boolean = false
 
     init {
         positions.add(position())
@@ -153,25 +154,19 @@ class Body(
 
     private fun PApplet.drawTrail() {
         inMatrix {
-            strokeWeight(1 / currentScale)
             if (trail && positions.size > 1) {
-                for (index in 1 until positions.size) {
-                    stroke(color.background)
-                    line(positions[index - 1], positions[index])
+                val trailShape = createShape()
+                trailShape.beginShape()
+                for (index in 0 until positions.size) {
+                    trailShape.vertex(positions[index].x, positions[index].y)
                 }
-
-                stroke(color.background)
-                line(positions.last(), lastPosition)
+                trailShape.vertex(lastPosition.x, lastPosition.y)
+                trailShape.noFill()
+                trailShape.endShape()
+                trailShape.setStroke(color(color.background))
+                trailShape.setStrokeWeight(1 / currentScale)
+                shape(trailShape)
             }
-            if (drawDiameter * currentScale > 20F) {
-                if (trail && positions.size > 1) {
-                    for (index in 0 until positions.size) {
-                        stroke(color.background)
-                        ellipse(positions[index], 4F / currentScale)
-                    }
-                }
-            }
-            strokeWeight(1F)
         }
     }
 
@@ -217,7 +212,7 @@ class Body(
     }
 
     companion object {
-        const val MAX_POSITIONS: Int = 2000
+        const val MAX_POSITIONS: Int = 16000
     }
 
 }
