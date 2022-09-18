@@ -283,6 +283,7 @@ class Simulation : PApplet() {
 
     override fun mouseDragged(event: MouseEvent) {
         if (!guiComponents().any { it.inside(event.position()) }) {
+            following = following?.unfollow()
             translate((currentTranslation + (Context.realMousePosition() - (currentTranslation + mouseClickedPosition / currentScale))))
         }
         mouseClickedPosition = event.position()
