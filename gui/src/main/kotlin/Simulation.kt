@@ -231,8 +231,7 @@ class Simulation : PApplet() {
         if (animate) {
             val newBodies =
                 calculateSwingByStep(this.bodies.associate { it.name() to it.data() }, deltaTime * timeFactor)
-            elapsedTimeDays += (deltaTime * timeFactor / 3600 / 24).toFloat()
-            gui.updateElapsedRealTime(elapsedTimeDays)
+            gui.updateElapsedRealTime(incrementElapsedTimeAndReturn())
             bodies.forEach { newBodies[it.name()]?.let { newBody -> it.update(newBody) } }
         }
         if (centerOnScreen) {
@@ -252,6 +251,11 @@ class Simulation : PApplet() {
         }
         guiComponents().draw()
         updateDeltaTime(System.currentTimeMillis())
+    }
+
+    private fun incrementElapsedTimeAndReturn(): Float {
+        elapsedTimeDays += (deltaTime * timeFactor / 3600 / 24).toFloat()
+        return elapsedTimeDays
     }
 
     override fun keyPressed(event: KeyEvent) {
