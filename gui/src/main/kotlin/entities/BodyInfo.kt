@@ -9,6 +9,7 @@ import de.arindy.swingby.gui.core.Context.unregister
 import de.arindy.swingby.gui.core.components.Component
 import de.arindy.swingby.gui.core.components.Label
 import de.arindy.swingby.gui.core.components.TextField
+import de.arindy.swingby.gui.core.components.Toggle
 import de.arindy.swingby.gui.core.fill
 import de.arindy.swingby.gui.core.notAValidHexCode
 import de.arindy.swingby.gui.core.rect
@@ -33,6 +34,7 @@ class BodyInfo(
     private var updateDataFunction: (Body) -> Unit = {}
     private var changeColorFunction: (Color) -> Unit = {}
     private var changeNameFunction: (String) -> Unit = {}
+    private var toggleVVecFunction: () -> Unit = {}
     private val decimalFormat: DecimalFormat = DecimalFormat("#.0#")
     private val components: ArrayList<Component> = ArrayList()
 
@@ -40,13 +42,23 @@ class BodyInfo(
         components.addAll(
             listOf(
                 TextField(
-                    position = { Position(position().x + (size.width) / 4, position().y + 5F) },
+                    position = { Position(position().x + 10F, position().y + 5F) },
                     size = Size(width = (size.width - 15F) / 2, 25F),
                     name = name,
                     value = name
                 ).register { _, newValue ->
                     changeNameFunction(newValue)
                 },
+                Toggle(
+                    position = {
+                        Position(
+                            position().x + 10F + (size.width - 15F) / 2 + 10F,
+                            position().y + 5F
+                        )
+                    },
+                    size = Size(width = (size.width - 35F) / 2, 25F),
+                    name = { "v-vector" }
+                ).registerAction { toggleVVecFunction() },
                 Label(
                     position = { Position(position().x + 5F, position().y + 35F) },
                     size = Size(width = size.width / 2 - 25F, 18F),
@@ -281,6 +293,11 @@ class BodyInfo(
 
     fun changeName(function: (String) -> Unit): BodyInfo {
         this.changeNameFunction = function
+        return this
+    }
+
+    fun toggleVVec(function: () -> Unit): BodyInfo {
+        this.toggleVVecFunction = function
         return this
     }
 }

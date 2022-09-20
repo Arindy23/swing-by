@@ -39,13 +39,17 @@ private fun nextBody(body: Body, others: MutableCollection<Body>, timeStep: Doub
         velocity2D = nextVelocity,
         mass = body.mass,
         diameter = body.diameter,
-        distanceToNextBody = others.map { distance(body.position, it.position) }.min()
+        distanceToNextBody = others.minOf { distance(body.position, it.position) }
     )
 }
 
 private fun nextVelocity(body: Body, others: MutableCollection<Body>, timeStep: Double): Velocity2D {
+    var crash: Body? = null
     val (x, y) = others.map {
         val distance = distance(body.position, it.position)
+        if (distance <= (body.diameter + it.diameter) / 2) {
+            crash = it
+        }
         Pair(
             it.mass / distance.pow(3) * (body.position.x - it.position.x),
             it.mass / distance.pow(3) * (body.position.y - it.position.y)
@@ -53,10 +57,17 @@ private fun nextVelocity(body: Body, others: MutableCollection<Body>, timeStep: 
     }.reduce { acc, pair ->
         Pair(acc.first + pair.first, acc.second + pair.second)
     }
-    return Velocity2D(
-        x = body.velocity2D.x - G * x * timeStep,
-        y = body.velocity2D.y - G * y * timeStep,
-    )
+    return if (crash != null) {
+        Velocity2D(
+            (body.mass * body.velocity2D.x + crash!!.mass * crash!!.velocity2D.x) / (body.mass + crash!!.mass),
+            (body.mass * body.velocity2D.y + crash!!.mass * crash!!.velocity2D.y) / (body.mass + crash!!.mass),
+        )
+    } else {
+        Velocity2D(
+            x = body.velocity2D.x - G * x * timeStep,
+            y = body.velocity2D.y - G * y * timeStep,
+        )
+    }
 }
 
 private fun nextPosition(body: Body, nextVelocity: Velocity2D, timeStep: Double): Coordinates {

@@ -48,6 +48,7 @@ class Body(
     private val info: BodyInfo
     private val label: Label
     var following: Boolean = false
+    private var vVec: Boolean = false
 
     init {
         positions.add(position())
@@ -87,6 +88,8 @@ class Body(
         }.changeName {
             this.name = { it }
             label.name = { it }
+        }.toggleVVec {
+            vVec = !vVec
         }
     }
 
@@ -120,6 +123,9 @@ class Body(
             drawTrail()
             drawBody()
             drawLabelPointer()
+            if (vVec) {
+                drawVelocityArrow()
+            }
         }
     }
 
@@ -179,6 +185,19 @@ class Body(
                 lastPosition + Position(diameter / 2 + 5F / currentScale, -(diameter / 2 + 5F / currentScale)),
                 lastPosition + Position(diameter / 2 + 15F / currentScale, -(diameter / 2 + 15F / currentScale))
             )
+            strokeWeight(1F)
+        }
+    }
+
+    private fun PApplet.drawVelocityArrow() {
+        inMatrix {
+            strokeWeight(1 / currentScale)
+            stroke("0xFFFFFF")
+            val velocity = Position(
+                data().velocity2D.x.toFloat() / currentScale,
+                data().velocity2D.y.toFloat() / currentScale
+            )
+            line(lastPosition, lastPosition + velocity)
             strokeWeight(1F)
         }
     }
